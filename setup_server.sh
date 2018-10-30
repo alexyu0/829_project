@@ -1,6 +1,7 @@
-sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get install build-essential \
+sudo apt-get -y update
+sudo apt-get -y upgrade
+sudo apt-get -y install \
+	build-essential \
 	lib32z1
 
 cd iperf
