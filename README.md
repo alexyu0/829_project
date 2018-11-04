@@ -2,4 +2,4 @@
 15829 project
 
 ## Dump naming
-Dumps are named as (# of connections)_c_(% loss)_l_dump
+Dumps are named as (location)\_(test size)\_(# of connections)c\_(% loss)l\_(endpoint).(run)
