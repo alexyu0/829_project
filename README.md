@@ -9,8 +9,7 @@ Dumps are named as (location)\_(test size)\_(endpoint)(client # for concurrent l
 relative time, src port, dest port, seq, ack, len
 
 ## Dump collection
-For each connection being simulated
-1. on AWS instance server, run `iperf3 -s`
-2. in separate window on AWS instance server, run 'sudo tcpdump port 5201 -w <file>`
-2. in one window on laptop, run `sudo tcpdump port <port> -w <file>`
-3. in one window on laptop, run `iperf3 --reverse --cport <port> --bytes <size> -c <AWS instance IP>
+Run `sudo visudo`, then add a line with `Defaults:<your username> timestamp_timeout=60` to prevent sudo timing out during a test run
+Use the script `scripts/run_test.py`
+ - instructions can be seen with `pipenv run scripts/run_test.py -h`
+ - e.g. `pipenv run python scripts/run_test.py -f testtest -I aws_ips.txt -P . -n 2 -i ~/.ssh/829.pem -t 1 -N`
