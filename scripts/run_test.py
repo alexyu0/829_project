@@ -71,20 +71,22 @@ def tcpdump_worker(ips, is_client, test_dir, i, args):
     if is_client:
         # client
         client_tcpdump_procs = []
+        filenames = []
         for j in range(0, len(ips)):
-            fname = "{}/{}_client{}_{}".format(test_dir, args.fname, j+1, i)
-            cmd = "sudo tcpdump -i any port {} -w {}.pcap".format(
+            fname = "{}/{}_client{}_{}.pcap".format(test_dir, args.fname, j+1, i)
+            cmd = "sudo tcpdump -i any port {} -w {}".format(
                 PORT_START + j,
                 fname)
-            print(cmd, repr(cmd))
             client_tcpdump_procs.append(subprocess.Popen([cmd],
                 shell=True))
+            filenames.append(fname)
 
         # wait to finish, then kill tcpdump
         while not threading.current_thread().stopped():
             time.sleep(0.5)
         for j in range(0, len(client_tcpdump_procs)):
             os.system("pgrep tcpdump | xargs sudo kill -SIGTERM")
+            os.system("zstd --rm -f {} -o {}.zst".format(filenames[j], filenames[j]))
     else:
         # server
         ssh_info = []
@@ -114,11 +116,18 @@ def tcpdump_worker(ips, is_client, test_dir, i, args):
             (ssh_client, ch) = ssh_info[j]
             ch.close()
             ssh_client.exec_command("pgrep tcpdump | xargs sudo kill -SIGTERM")
+            ssh_client.exec_command("zstd --rm -f {}_{}.pcap -o {}_{}.pcap.zst".format(
+                os.path.basename(test_dir), 
+                filenames[j],
+                os.path.basename(test_dir), 
+                filenames[j]))
             ftp_client = ssh_client.open_sftp()
             ftp_client.get(
-                "{}_{}.pcap".format(os.path.basename(test_dir), filenames[j]),
-                "{}/{}.pcap".format(test_dir, filenames[j]))
-            ssh_client.exec_command("rm {}_{}.pcap".format(os.path.basename(test_dir), filenames[j]))
+                "{}_{}.pcap.zst".format(os.path.basename(test_dir), filenames[j]),
+                "{}/{}.pcap.zst".format(test_dir, filenames[j]))
+            ssh_client.exec_command("rm {}_{}.pcap.zst".format(
+                os.path.basename(test_dir), 
+                filenames[j]))
             ssh_client.close()
 
 def test(args):
@@ -187,7 +196,6 @@ def test(args):
                 PORT_START + j, 
                 duration,
                 ips[j])
-            print(cmd)
             client_iperf_procs.append(subprocess.Popen(cmd,
                 shell=True,
                 stdout=w))
@@ -218,7 +226,7 @@ parser = argparse.ArgumentParser(prog="PROG",
 
 required_args = parser.add_argument_group("required")
 required_args.add_argument("-f", "--fname",
-    help="file name for trace dump, \n*** DON'T INCLUDE ENDPOINT OR TRIAL # ***\n")
+    help="file name for trace dump, format <location>_<duration or size of test>\n")
 required_args.add_argument("-I", "--ips",
     help="file containing list of server IPs, \n*** DON'T INCLUDE ENDPOINT OR TRIAL # ***\n")
 required_args.add_argument("-P", "--path", 

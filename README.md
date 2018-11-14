@@ -9,6 +9,8 @@ Dumps are named as (location)\_(test size)\_(endpoint)(client # for concurrent l
 relative time, src port, dest port, seq, ack, len
 
 ## Dump collection
+Make sure you have `zstd` installed
+ - `brew install zstd` for OSX
 Run `sudo visudo`, then add a line with `Defaults:<your username> timestamp_timeout=60` to prevent sudo timing out during a test run
 Use the script `scripts/run_test.py`
  - instructions can be seen with `pipenv run scripts/run_test.py -h`
