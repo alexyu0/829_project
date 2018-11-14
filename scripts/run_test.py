@@ -86,7 +86,11 @@ def tcpdump_worker(ips, is_client, test_dir, i, args):
             time.sleep(0.5)
         for j in range(0, len(client_tcpdump_procs)):
             os.system("pgrep tcpdump | xargs sudo kill -SIGTERM")
-            os.system("zstd --rm -19 -f {} -o {}.zst".format(filenames[j], filenames[j]))
+            time.sleep(0.5)
+            subprocess.run("zstd --rm -19 -f {} -o {}.zst".format(
+                filenames[j], filenames[j]),
+                shell=True,
+                check=True)
     else:
         # server
         ssh_info = []
@@ -116,11 +120,15 @@ def tcpdump_worker(ips, is_client, test_dir, i, args):
             (ssh_client, ch) = ssh_info[j]
             ch.close()
             ssh_client.exec_command("pgrep tcpdump | xargs sudo kill -SIGTERM")
-            ssh_client.exec_command("zstd --rm -19 -f {}_{}.pcap -o {}_{}.pcap.zst".format(
-                os.path.basename(test_dir), 
-                filenames[j],
-                os.path.basename(test_dir), 
-                filenames[j]))
+            stdin, stdout, stderr = ssh_client.exec_command(
+                "zstd --rm -19 -f {}_{}.pcap -o {}_{}.pcap.zst".format(
+                    os.path.basename(test_dir), 
+                    filenames[j],
+                    os.path.basename(test_dir), 
+                    filenames[j]))
+            if stdout.channel.recv_exit_status() != 0:
+                print(stderr)
+                sys.exit(1)
             ftp_client = ssh_client.open_sftp()
             ftp_client.get(
                 "{}_{}.pcap.zst".format(os.path.basename(test_dir), filenames[j]),
