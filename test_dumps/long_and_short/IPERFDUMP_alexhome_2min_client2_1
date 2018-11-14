@@ -1,0 +1,9 @@
+Connecting to host 54.164.173.148, port 5201
+Reverse mode, remote host 54.164.173.148 is sending
+[  5] local 10.6.6.86 port 62388 connected to 54.164.173.148 port 5201
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-2.65   sec  2.05 MBytes  6.49 Mbits/sec                  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-2.65   sec  0.00 Bytes  0.00 bits/sec                  sender
+[  5]   0.00-2.65   sec  2.05 MBytes  6.49 Mbits/sec                  receiver

@@ -4,6 +4,8 @@
 ## Dump formats
 ### Naming
 Dumps are named as (location)\_(test size)\_(endpoint)(client # for concurrent long tests)\_(run)
+They are located in test_dumps/(test_type) and can be decompressed into .pcap
+with `zstd <filename>.pcap.zstd -d -o <filename>.pcap`
 
 ### CSV format
 relative time, src port, dest port, seq, ack, len
@@ -16,4 +18,4 @@ Run `sudo visudo`, then add a line with `Defaults:<your username> timestamp_time
 
 Use the script `scripts/run_test.py`
  - instructions can be seen with `pipenv run scripts/run_test.py -h`
- - e.g. `pipenv run python scripts/run_test.py -f testtest -I aws_ips.txt -P . -n 2 -i ~/.ssh/829.pem -t 1 -N`
+ - e.g. `pipenv run python scripts/run_test.py -I aws_ips.txt -P . -n 2 -i ~/.ssh/829.pem -t 1 -N -l home`

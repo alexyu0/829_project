@@ -1,0 +1,9 @@
+Connecting to host 54.90.220.29, port 5201
+Reverse mode, remote host 54.90.220.29 is sending
+[  5] local 10.6.6.86 port 62387 connected to 54.90.220.29 port 5201
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-2.62   sec  1.10 MBytes  3.53 Mbits/sec                  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-2.62   sec  0.00 Bytes  0.00 bits/sec                  sender
+[  5]   0.00-2.62   sec  1.10 MBytes  3.53 Mbits/sec                  receiver
