@@ -86,7 +86,7 @@ def tcpdump_worker(ips, is_client, test_dir, i, args):
             time.sleep(0.5)
         for j in range(0, len(client_tcpdump_procs)):
             os.system("pgrep tcpdump | xargs sudo kill -SIGTERM")
-            os.system("zstd --rm -f {} -o {}.zst".format(filenames[j], filenames[j]))
+            os.system("zstd --rm -19 -f {} -o {}.zst".format(filenames[j], filenames[j]))
     else:
         # server
         ssh_info = []
@@ -116,7 +116,7 @@ def tcpdump_worker(ips, is_client, test_dir, i, args):
             (ssh_client, ch) = ssh_info[j]
             ch.close()
             ssh_client.exec_command("pgrep tcpdump | xargs sudo kill -SIGTERM")
-            ssh_client.exec_command("zstd --rm -f {}_{}.pcap -o {}_{}.pcap.zst".format(
+            ssh_client.exec_command("zstd --rm -19 -f {}_{}.pcap -o {}_{}.pcap.zst".format(
                 os.path.basename(test_dir), 
                 filenames[j],
                 os.path.basename(test_dir), 
