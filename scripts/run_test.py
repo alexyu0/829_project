@@ -141,6 +141,7 @@ def test(args):
     print("...hosts set up")
 
     # set up test directory
+    args.path = args.path.rstrip("/")
     root_test_dir = os.path.abspath(args.path)
     if args.concurrentlong:
         test_dir = "{}/{}".format(root_test_dir, "concurrent_long")
