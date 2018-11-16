@@ -5,8 +5,9 @@ from collections import defaultdict
 import pprint
 
 import constants
-import helpers
+from helpers import make_csv, decompress
 
+# **************************** DATA EXTRACTION ****************************** #
 def get_lost_packets(client_data, server_data):
     """
     Main functionality
@@ -121,10 +122,12 @@ def get_test_name(fname, endpoint):
     
     testname = os.path.basename(fname[0:fname.index(endpoint)]).rstrip(".csv")
     return "{}_{}".format(testname, run_no)
+# *********************************** END *********************************** #
 
-def loss_length_hist(fname, data_lines, endpoint):
+# ************************** STATISTIC ANALYSES ***************************** #
+def loss_length_hist(data_lines):
     """
-    Graphs histogram of bursts of loss experienced
+    Returns histogram of bursts of loss experienced
     """
     loss_bursts = {}
     loss_active = False
@@ -143,8 +146,39 @@ def loss_length_hist(fname, data_lines, endpoint):
                     loss_bursts[loss_count] += 1
                 loss_active = False
                 loss_count = 0
-    print(endpoint, loss_bursts)
     
+    return loss_bursts
+
+def loss_timescale(data_lines):
+    """
+    Returns loss on timescale
+    """
+    bucketStart = 0
+    nextBucket = bucketStart + constants.BUCKET_SIZE
+
+    time_buckets = []
+    data_buckets = []
+    curr_data_bucket = 0
+
+    for (ts, lost) in data_lines:
+        # See if we are on the next bucket.
+        if float(ts) >= nextBucket:
+            time_buckets.append(nextBucket)  # Append x-axis point.
+            nextBucket += constants.BUCKET_SIZE  # Go to next bucket.
+            data_buckets.append(curr_data_bucket)  # Append y-axis point.
+            curr_data_bucket = 0  # Reset y-axis sum.
+
+        if lost:
+            curr_data_bucket += 1
+    
+    return (time_buckets, data_buckets)
+# *********************************** END *********************************** #
+
+# ******************************** GRAPHING ********************************** #
+def graph_hist(fname, endpoint, loss_bursts):
+    """
+    Graphs the histogram generated from loss_length_hist
+    """
     keys = sorted([int(k) for k in loss_bursts.keys()])
     g = plt.bar(range(0, len(keys)), [v for (k,v) in sorted(loss_bursts.items())], width=0.8)
     ax = plt.gca()
@@ -176,28 +210,7 @@ def loss_length_hist(fname, data_lines, endpoint):
     plt.clf()
     plt.close()
 
-def loss_timescale(fname, data_lines, endpoint):
-    """
-    Graphs loss on timescale graph
-    """
-    bucketStart = 0
-    nextBucket = bucketStart + constants.BUCKET_SIZE
-
-    time_buckets = []
-    data_buckets = []
-    curr_data_bucket = 0
-
-    for (ts, lost) in data_lines:
-        # See if we are on the next bucket.
-        if float(ts) >= nextBucket:
-            time_buckets.append(nextBucket)  # Append x-axis point.
-            nextBucket += constants.BUCKET_SIZE  # Go to next bucket.
-            data_buckets.append(curr_data_bucket)  # Append y-axis point.
-            curr_data_bucket = 0  # Reset y-axis sum.
-
-        if lost:
-            curr_data_bucket += 1
-
+def graph_loss_timescale(fname, endpoint, time_buckets, data_buckets):
     plt.plot(time_buckets, data_buckets)
     plt.xlabel("Time (in buckets of %0.2f seconds)" % constants.BUCKET_SIZE)
     plt.ylabel("Packets lost")
@@ -211,29 +224,67 @@ def loss_timescale(fname, data_lines, endpoint):
         endpoint))
     plt.clf()
     plt.close()
+# *********************************** END *********************************** #
 
-def overall_stats(fname, data_lines, endpoint):
+# ******************************** SCRIPTS ********************************** #
+def run_all_zst(grouped_files, name_pre, analysis_dir, csv_dir):
     """
-    Calculate overall statistics of loss and write to file
+    Runs analysis on all the compressed files from grouped_files
+    grouped_files is test -> endpoint -> list of runs
     """
-    lost_packets = 0
-    total_packets = 0
+    for test in grouped_files:
+        # make directories as needed
+        if not os.path.exists("{}/{}".format(analysis_dir, test)):
+            os.makedirs("{}/{}".format(analysis_dir, test))
+        if not os.path.exists("{}/{}".format(csv_dir, test)):
+            os.makedirs("{}/{}".format(csv_dir, test))
 
-    for (ts, lost) in data_lines:
-        if lost:
-            lost_packets += 1
-        total_packets += 1
+        loss_hists = defaultdict(list) # endpoint -> results
+        loss_timescales = defaultdict(list) # endpoint -> results
+        for endpoint in grouped_files[test]:
+            print("Analyzing connection {}...".format(endpoint))
+            for (client_zst, server_zst) in grouped_files[test][endpoint]:
+                # decompress
+                client_pcapfile = decompress(client_zst)
+                server_pcapfile = decompress(server_zst)
 
-    outfile = "{}{}/LossStats_{}_{}.csv".format(
-        constants.RESULT_DIR,
-        csv_subdir_str,
-        get_test_name(fname, endpoint),
-        endpoint)
-    with open(outfile, "w") as out_f:
-        out_f.write("Lost packets: {}\n".format(lost_packets))
-        out_f.write("Total packets: {}\n".format(total_packets))
-        out_f.write("Loss rate: {:f}%\n".format(float(lost_packets)/total_packets * 100))
+                # make csvs
+                client_csv_file = make_csv(client_pcapfile, "X", csv_dir)
+                server_csv_file = make_csv(server_pcapfile, "X", csv_dir)
 
+                client_e = "client" + endpoint
+                server_e = "server" + endpoint
+
+                # do things
+                client_fname = os.path.abspath(client_csv_file)
+                server_fname = os.path.abspath(server_csv_file)
+                client_f = open(client_csv_file)
+                server_f = open(server_csv_file)
+                client_data = client_f.readlines()
+                server_data = server_f.readlines()
+                client_loss_data, server_loss_data = get_lost_packets(
+                    client_data, server_data)
+                client_loss_bursts = loss_length_hist(client_loss_data)
+                client_loss_timescale = loss_timescale(client_loss_data)
+                server_loss_bursts = loss_length_hist(server_loss_data)
+                server_loss_timescale = loss_timescale(server_loss_data)
+                loss_hists[client_e].append(client_loss_bursts)
+                loss_timescales[client_e].append(client_loss_timescale)
+                loss_hists[server_e].append(server_loss_bursts)
+                loss_timescales[server_e].append(server_loss_timescale)
+                client_f.close()
+                server_f.close()
+
+                # remove decompressed files
+                os.system("rm {} {}".format(client_pcapfile, server_pcapfile))
+
+            # average and then graph
+            graph_hist(loss_bursts, endpoint, name_pre, csv_dir):
+        
+            print("...done")
+# *********************************** END *********************************** #
+
+# ********************************** MAIN *********************************** #
 if __name__ == "__main__":
     if len(sys.argv) < 2 or (len(sys.argv) < 3 and sys.argv[1] != "--all"):
         print("Usage: python scrape_loss_stats.py --all \n OR \n \
@@ -267,6 +318,11 @@ if __name__ == "__main__":
     else:
         csvs = [[sys.argv[1], sys.argv[2]]]
     
+    analyze(csvs)
+# *********************************** END *********************************** #
+
+# ******************************* DEPRECATED ********************************* #
+def analyze(csvs):
     for (client_csv_file, server_csv_file) in csvs:
         print("Analyzing {} and {}...".format(
             os.path.basename(client_csv_file),
@@ -307,3 +363,26 @@ if __name__ == "__main__":
         server_f.close()
         
         print("...done")
+
+def overall_stats(fname, data_lines, endpoint):
+    """
+    Calculate overall statistics of loss and write to file
+    """
+    lost_packets = 0
+    total_packets = 0
+
+    for (ts, lost) in data_lines:
+        if lost:
+            lost_packets += 1
+        total_packets += 1
+
+    outfile = "{}{}/LossStats_{}_{}.csv".format(
+        constants.RESULT_DIR,
+        csv_subdir_str,
+        get_test_name(fname, endpoint),
+        endpoint)
+    with open(outfile, "w") as out_f:
+        out_f.write("Lost packets: {}\n".format(lost_packets))
+        out_f.write("Total packets: {}\n".format(total_packets))
+        out_f.write("Loss rate: {:f}%\n".format(float(lost_packets)/total_packets * 100))
+# *********************************** END *********************************** #

@@ -109,7 +109,7 @@ def client_tcpdump(ips, test_dir, i, file_name, file_name_short, args):
             fname = "{}/{}_client{}_{}.pcap".format(test_dir, file_name_short, j+1, i)
         else:
             fname = "{}/{}_client{}_{}.pcap".format(test_dir, file_name, j+1, i)
-        cmd = "sudo tcpdump tcp -n -i any -B 4096 port {} and dst host {} -w {}".format(
+        cmd = "sudo tcpdump tcp -n -i any -B 4096 port {} and host {} -w {}".format(
             PORT_START + j,
             ips[j],
             fname)
@@ -234,6 +234,7 @@ def test(args):
             client_iperf_procs.append(subprocess.Popen(cmd,
                 shell=True,
                 stdout=w))
+        print("...started local iperfs")
 
         # wait to finish
         if args.longshort:
