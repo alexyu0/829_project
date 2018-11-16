@@ -7,23 +7,29 @@ import subprocess
 import time
 import random
 import atexit
+import bandwidth as bw
+import csv
 
 from constants import PORT_START
 
+# removes csv file after extracting csv data
 def parseCSV(file):
     csvData = []
     with open(file, newline='') as csvfile:
         csvReader = csv.reader(csvfile)
         for row in csvReader:
             csvData.append(row)
+    csvfile.close()
+    # remove csv file after use.
+    os.system("rm {}".format(file))
     return csvData
 
-
+# removes pcap file after creating csv file
 def make_csv(pcapfile, analysis_type):
     csvfile = pcapfile.split(".")[0] + ".csv"
+
     if analysis_type == "Y": # latency
         os.system("tshark -r {} -Y tcp.analysis.ack_rtt -e tcp.analysis.ack_rtt -T fields -E separator=, -E quote=d > {}".format(pcapfile, csvfile))
-        return csvfile
     else:
         os.system('tshark -r {} \
         -Y "tcp" \
@@ -37,27 +43,40 @@ def make_csv(pcapfile, analysis_type):
         -T fields \
         -E separator=, \
         > {}'.format(pcapfile, csvfile))
-        return csvfile
+        
+    os.system("rm {}".format(pcapfile))
+    return csvfile
 
-def decompress(file_name):
-    pcap = file_name.split(".")[0] + ".pcap"
-    os.system("zstd {} -d -o {}".format(file_name, pcap))
+# takes a .zst file, doesn't remove the compressed version
+def decompress(zstfile):
+    pcapfile = zstfile.split(".zst")[0]
+    os.system("zstd {} -d -o {}".format(zstfile, pcapfile))
     return pcapfile
+
+# takes a pcap file
+def compress(pcapfile):
+    zstfile = pcapfile.split(".")[0] + ".zst"
+    os.system("zstd --rm -19 -f {} -o {}".format(pcapfile, zstfile))
 
 def analysis(args):
     """
     main analysis function
     """
+    print("Getting necessary files for ", end="")
     analysis_type = ""
     if args.bandwidth:
         analysis_type = "B"
+        print("bandwidth ",end="")
     elif args.loss:
         analysis_type = "X"
+        print("loss ",end="")
     elif args.latency:
         analysis_type = "Y"
+        print("latency ",end="")
     else:
         print("Invalid analysis specified")
         sys.exit(1)
+    print("analysis...")
     # make file name
     duration = ""
     short_duration = ""
@@ -79,7 +98,7 @@ def analysis(args):
     # set up directories
     args.path = args.path.rstrip("/")
     root_analysis_dir = os.path.abspath(args.path)
-    root_test_dir = "/".join(root_analysis_dir.split("/")[:len(root_analysis_dir.split("/"))-1]) + args.testdir
+    root_test_dir = "/".join(root_analysis_dir.split("/")[:len(root_analysis_dir.split("/"))-1]) + "/" + args.testdir
     if args.concurrentlong:
         analysis_dir = "{}/{}/{}".format(root_analysis_dir, "concurrent_long", file_name)
         test_dir = "{}/{}/{}".format(root_test_dir, "concurrent_long", file_name)
@@ -97,31 +116,33 @@ def analysis(args):
         sys.exit(1)
     if not os.path.exists(analysis_dir):
         os.makedirs(analysis_dir)
-    print("...analysis_dir {} set up to analyze test_dir {}.".format(analysis_dir, test_dir))
+    print("Analysis_dir {} set up to analyze test_dir {}.".format(analysis_dir, test_dir))
 
     # decompress files one at a time and extract information from them
     csv_data_for_files = {}
     for file_name in os.listdir(test_dir):
         if file_name.endswith(".zst"):
+            file_with_path = test_dir + "/" + file_name
             # decompress one at a time size these files are big
-            pcapfile = decompress(file_name)
+            pcapfile = decompress(file_with_path)
             if not os.path.exists(pcapfile):
                 print("Failed to create pcap file for {}".format(file_name))
                 sys.exit(1)
             # make different csv depending on the test
-            csvfile = make_csv(pcapfile, analysis_type)
+            csvfile = make_csv(pcapfile, analysis_type) # removes pcapfile
             if not os.path.exists(csvfile):
                 print("Failed to create csv file for {}".format(file_name))
                 sys.exit(1)
             # extract data for each file
-            csv_data_for_files[file_name] = parseCSV(csvfile)
+            csv_data_for_files[file_name] = parseCSV(csvfile) # removes csvfile
             # compress to save storage 
+            #compress(pcapfile)
 
 
     # run analysis on files
     if args.bandwidth:
         print("Analyzing bandwidth...")
-        #getBandwidth(csv_data_for_files)
+        bw.getBandwidth(csv_data_for_files)
     elif args.loss:
         print("Analyzing packet loss...")
 
@@ -129,7 +150,7 @@ def analysis(args):
         print("Analyzing per packet latency...")
         #getLatency(csv_data_for_files)
         
-
+    print("Analysis complete.")
     return
 
 formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=30)
@@ -171,10 +192,13 @@ test_style_args.add_argument("-N", "--normal",
 
 test_args = parser.add_mutually_exclusive_group(required=True)
 test_args.add_argument("-B", "--bandwidth",
+    action="store_true",
     help="analyze bandwidth\n")
 test_args.add_argument("-X", "--loss",
+    action="store_true",
     help="analyze loss\n")
 test_args.add_argument("-Y", "--latency",
+    action="store_true",
     help="analyze per packet latency\n")
 
 parser.set_defaults(func=analysis)

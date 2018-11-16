@@ -5,7 +5,7 @@ import sys
 
 # Default values.
 bucketSize = 0.1
-srcPort = 62387
+srcPort = 62388
 destPort = 5201
 prefix = "K"
 
@@ -14,15 +14,6 @@ TIME_NAME = "Time"
 TIME_COL = 1
 INFO_NAME = "Info"
 INFO_COL = 6
-
-# Raw CSV parser, includes the table headers.
-def parseCSV(file):
-	csvData = []
-	with open(file, newline='') as csvfile:
-		csvReader = csv.reader(csvfile)
-		for row in csvReader:
-			csvData.append(row)
-	return csvData
 
 # Determines whether this message was between the given ports.
 # The order of the ports doesn't matter.
@@ -96,6 +87,7 @@ def divideByBuckets(buckets, dataPerBucketList, prefix):
 
 # Plot.
 def plotBandwidth(buckets, bandwidthPerBucket, prefix, file):
+	print("Plotting bandwidth...")
 	plt.plot(buckets, bandwidthPerBucket)
 	plt.xlabel("Time (in buckets of %0.2f seconds)" % bucketSize)
 	plt.ylabel("Bandwidth (in data %sB/second)" % prefix)
@@ -104,29 +96,21 @@ def plotBandwidth(buckets, bandwidthPerBucket, prefix, file):
 
 
 # Main.
-def getBandwidth():
-	if len(sys.argv) <= 1:
-		print("Please give at least one file as an argument.")
-		exit()
+def getBandwidth(csvDataForFiles):
 
-	for argNum in range(1, len(sys.argv)):
-		file = sys.argv[argNum]
-		print("Getting bandwidth calculations on file %s wtih bucket size %0.3f..." % (file, bucketSize))
+	for filename in csvDataForFiles:
+		print("Getting bandwidth calculations on file %s wtih bucket size %0.3f..." % (filename, bucketSize))
 
-		csvData = parseCSV(file)
+		csvData = csvDataForFiles[filename]
 		print("Got CSV data, row 1 = ", csvData[1])
 
 		buckets, dataPerBucketList = calculateBandwidth(csvData, srcPort, destPort)
-
-		print("Buckets = ", buckets)
-		print("Data per bucket = ", dataPerBucketList)
+		print("Separated bandwidth data into buckets...")
 
 		bandwidthPerBucket = divideByBuckets(buckets, dataPerBucketList, prefix)
-
-		print("Bandwidth per bucket = ", bandwidthPerBucket)
+		print("Got bandwidth per bucket...")
 
 		plotBandwidth(buckets, bandwidthPerBucket, prefix, file)
-
 		print("Calculations on file %s complete." % file)
 
 # Command-line flags are defined here.
@@ -140,4 +124,4 @@ def getBandwidth():
 # Parse command-line arguments.
 # args = parse_arguments()
 # bucketSize = args.bucketSize
-getBandwidth()
+# getBandwidth()
