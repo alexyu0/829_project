@@ -242,7 +242,7 @@ def test(args):
             while proc.poll() is None:
                 client_iperf_procs[1].wait()
                 print("short client iperf done, going again")
-                time.sleep(random.randint(5, 10))
+                time.sleep(random.randint(10, 15))
                 cmd = "iperf3 --reverse --cport {} {} -c {}".format(
                     PORT_START + 1, 
                     short_duration,

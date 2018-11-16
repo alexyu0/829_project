@@ -9,8 +9,11 @@ import random
 import atexit
 import bandwidth as bw
 import csv
+from collections import defaultdict
 
 from constants import PORT_START
+from loss_stats import analyze_loss
+from helpers import make_csv, decompress, compress
 
 # removes csv file after extracting csv data
 def parseCSV(file):
@@ -23,40 +26,6 @@ def parseCSV(file):
     # remove csv file after use.
     os.system("rm {}".format(file))
     return csvData
-
-# removes pcap file after creating csv file
-def make_csv(pcapfile, analysis_type):
-    csvfile = pcapfile.split(".")[0] + ".csv"
-
-    if analysis_type == "Y": # latency
-        os.system("tshark -r {} -Y tcp.analysis.ack_rtt -e tcp.analysis.ack_rtt -T fields -E separator=, -E quote=d > {}".format(pcapfile, csvfile))
-    else:
-        os.system('tshark -r {} \
-        -Y "tcp" \
-        -e frame.time_relative \
-        -e ip.id \
-        -e tcp.srcport \
-        -e tcp.dstport \
-        -e tcp.seq \
-        -e tcp.ack \
-        -e tcp.len \
-        -T fields \
-        -E separator=, \
-        > {}'.format(pcapfile, csvfile))
-
-    os.system("rm {}".format(pcapfile))
-    return csvfile
-
-# takes a .zst file, doesn't remove the compressed version
-def decompress(zstfile):
-    pcapfile = zstfile.split(".zst")[0]
-    os.system("zstd {} -d -o {}".format(zstfile, pcapfile))
-    return pcapfile
-
-# takes a pcap file
-def compress(pcapfile):
-    zstfile = pcapfile.split(".")[0] + ".zst"
-    os.system("zstd --rm -19 -f {} -o {}".format(pcapfile, zstfile))
 
 def analysis(args):
     """
@@ -91,31 +60,34 @@ def analysis(args):
         short_duration = "--bytes {}".format(int(int(args.size) * 10000))
         name_short_duration = "{}MB".format(str(int(int(args.size) * 10000)))
     file_name = "{}_{}".format(args.location, name_duration)
-    file_name_short = ""
-    if args.longshort:
-        file_name_short = "{}_{}".format(args.location, name_short_duration)
 
     # set up directories
     args.path = args.path.rstrip("/")
     root_analysis_dir = os.path.abspath(args.path)
-    root_dir = "/".join(root_analysis_dir.split("/")[:len(root_analysis_dir.split("/"))-1]) + "/"
+    root_dir = os.path.dirname(root_analysis_dir) + "/"
     root_test_dir = root_dir + args.testdir
     root_graph_dir = root_dir + args.graphdir
+    if args.savecsv:
+        root_csv_dir = root_dir + args.csvdir
+    else:
+        root_csv_dir = ""
+    test_str = ""
     if args.concurrentlong:
         analysis_dir = "{}/{}/{}".format(root_analysis_dir, "concurrent_long", file_name)
         test_dir = "{}/{}/{}".format(root_test_dir, "concurrent_long", file_name)
         graph_dir = "{}/{}/{}/{}".format(root_graph_dir, analysis_type, "concurrent_long", file_name)
+        test_str = "concurrent_long"
     elif args.longshort:
         analysis_dir = "{}/{}/{}".format(root_analysis_dir, "long_and_short", file_name)
         test_dir = "{}/{}/{}".format(root_test_dir, "long_and_short", file_name)
         graph_dir = "{}/{}/{}/{}".format(root_graph_dir, analysis_type, "long_and_short", file_name)
+        test_str = "long_and_short"
     elif args.normal:
         analysis_dir = "{}/{}/{}".format(root_analysis_dir, "normal", file_name)
         test_dir = "{}/{}/{}".format(root_test_dir, "normal", file_name)
         graph_dir = "{}/{}/{}/{}".format(root_graph_dir, analysis_type, "normal", file_name)
-    else:
-        print("NO VALID FILE FORMAT")
-        sys.exit(1)
+        test_str = "normal"
+
     if not os.path.exists(test_dir):
         print("Test dir {} doesn't exist!".format(test_dir))
         sys.exit(1)
@@ -123,6 +95,10 @@ def analysis(args):
         os.makedirs(graph_dir)
     if not os.path.exists(analysis_dir):
         os.makedirs(analysis_dir)
+    if root_csv_dir != "" and not os.path.exists(root_csv_dir + "/rtt"):
+        os.makedirs(root_csv_dir + "/rtt")
+    if root_csv_dir != "" and not os.path.exists(root_csv_dir + "/info"):
+        os.makedirs(root_csv_dir + "/info")
     print("Analysis_dir {} set up to analyze test_dir {}.".format(analysis_dir, test_dir))
 
     # decompress files one at a time and extract information from them
@@ -131,20 +107,22 @@ def analysis(args):
         if file_name.endswith(".zst"):
             file_with_path = test_dir + "/" + file_name
             # decompress one at a time size these files are big
+            print("Decompressing {}...".format(os.path.basename(file_name)))
             pcapfile = decompress(file_with_path)
             if not os.path.exists(pcapfile):
                 print("Failed to create pcap file for {}".format(file_name))
                 sys.exit(1)
+
             # make different csv depending on the test
-            csvfile = make_csv(pcapfile, analysis_type) # removes pcapfile
+            print("Parsing {} to csv...".format(os.path.basename(file_name)))
+            csvfile = make_csv(pcapfile, analysis_type, root_csv_dir) # removes pcapfile too
             if not os.path.exists(csvfile):
                 print("Failed to create csv file for {}".format(file_name))
                 sys.exit(1)
+
             # extract data for each file
             csv_data_for_files[file_name] = parseCSV(csvfile) # removes csvfile
-            # compress to save storage 
-            #compress(pcapfile)
-
+            print("...{} done".format(os.path.basename(file_name)))
 
     # run analysis on files
     if args.bandwidth:
@@ -152,7 +130,7 @@ def analysis(args):
         bw.getBandwidth(csv_data_for_files, graph_dir)
     elif args.loss:
         print("Analyzing packet loss...")
-
+        analyze_loss(csv_data_for_files, graph_dir, test_str)
     elif args.latency:
         print("Analyzing per packet latency...")
         #getLatency(csv_data_for_files)
@@ -173,6 +151,11 @@ required_args.add_argument("-l", "--location",
 #     help="file containing list of server IPs, \n*** DON'T INCLUDE ENDPOINT OR TRIAL # ***\n")
 required_args.add_argument("-P", "--path", 
     help="path to root directory of analysis results\n")
+required_args.add_argument("-c", "--csvdir", 
+    help="path to root directory of where to store csvs\n")
+required_args.add_argument("-S", "--savecsv",
+    action="store_true",
+    help="save CSVs and look for saved CSVs\n")
 required_args.add_argument("-T", "--testdir",
     help="directory name of the test directory (not full path)")
 required_args.add_argument("-G", "--graphdir",
@@ -209,6 +192,9 @@ test_args.add_argument("-X", "--loss",
 test_args.add_argument("-Y", "--latency",
     action="store_true",
     help="analyze per packet latency\n")
+
+test_args = parser.add_argument("-A", "--alldumps",
+    help="run specified analysis on all dumps in the specified root test dir")
 
 parser.set_defaults(func=analysis)
 

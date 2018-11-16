@@ -1,6 +1,7 @@
 import constants
 import csv
 import os
+import sys
 
 def parseCSV(file):
     """
@@ -39,32 +40,73 @@ def calculate_time_bucket_data(csvData, data_fn):
         curr_data_bucket += data_fn(row) # add to curr_data_bucket
 
     return time_buckets, data_buckets
+    
+# removes pcap file after creating csv file
+def make_csv(pcapfile, analysis_type, root_csv_dir):
+    csvfile = pcapfile.split(".")[0] + ".csv"
 
-def make_csv(pcapfile, analysis_type, dir=""):
-    if dir != "":
-        csv_name = os.path.basename(pcapfile).split(".")[0] + ".csv"
-        csvfile = "{}/{}".format(dir, csv_name)
-    else:
-        csvfile = pcapfile.split(".")[0] + ".csv"
+    # checks if csv already exists first
     if analysis_type == "Y": # latency
-        os.system("tshark -r {} -Y tcp.analysis.ack_rtt -e tcp.analysis.ack_rtt -T fields -E separator=, -E quote=d > {}".format(pcapfile, csvfile))
-        return csvfile
-    else:
-        os.system('tshark -r {} \
-        -Y "tcp" \
-        -e frame.time_relative \
-        -e ip.id \
-        -e tcp.srcport \
-        -e tcp.dstport \
-        -e tcp.seq \
-        -e tcp.ack \
-        -e tcp.len \
-        -T fields \
-        -E separator=, \
-        > {}'.format(pcapfile, csvfile)
-        return csvfile
+        if root_csv_dir != "":
+            csvfile_path = "{}/rtt/{}".format(root_csv_dir, os.path.basename(csvfile))
+            if os.path.exists(csvfile_path):
+                return csvfile_path
 
-def decompress(file_name):
-    pcap = file_name.split(".")[0] + ".pcap"
-    os.system("zstd {} -d -o {}".format(file_name, pcap))
-    return pcap
+            os.system("tshark -r {} \
+                -Y tcp.analysis.ack_rtt \
+                -e tcp.analysis.ack_rtt \
+                -T fields \
+                -E separator=, \
+                -E quote=d > {}".format(pcapfile, csvfile_path))
+        else:
+            os.system("tshark -r {} \
+                -Y tcp.analysis.ack_rtt \
+                -e tcp.analysis.ack_rtt \
+                -T fields \
+                -E separator=, \
+                -E quote=d > {}".format(pcapfile, csvfile))
+    else:
+        if root_csv_dir != "":
+            csvfile_path = "{}/info/{}".format(root_csv_dir, os.path.basename(csvfile))
+            if os.path.exists(csvfile_path):
+                return csvfile_path
+
+            os.system('tshark -r {} \
+                -Y "tcp" \
+                -e frame.time_relative \
+                -e ip.id \
+                -e tcp.srcport \
+                -e tcp.dstport \
+                -e tcp.seq \
+                -e tcp.ack \
+                -e tcp.len \
+                -T fields \
+                -E separator=, \
+                > {}'.format(pcapfile, csvfile_path))
+        else:
+            os.system('tshark -r {} \
+                -Y "tcp" \
+                -e frame.time_relative \
+                -e ip.id \
+                -e tcp.srcport \
+                -e tcp.dstport \
+                -e tcp.seq \
+                -e tcp.ack \
+                -e tcp.len \
+                -T fields \
+                -E separator=, \
+                > {}'.format(pcapfile, csvfile))
+
+    os.system("rm {}".format(pcapfile))
+    return csvfile
+
+# takes a .zst file, doesn't remove the compressed version
+def decompress(zstfile):
+    pcapfile = zstfile.split(".zst")[0]
+    #os.system("zstd {} -d -o {}".format(zstfile, pcapfile))
+    return pcapfile
+
+# takes a pcap file
+def compress(pcapfile):
+    zstfile = pcapfile.split(".")[0] + ".zst"
+    os.system("zstd --rm -19 -f {} -o {}".format(pcapfile, zstfile))
