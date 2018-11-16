@@ -19,15 +19,25 @@ relative time, src port, dest port, seq, ack, len
     * instructions can be seen with `pipenv run scripts/run_test.py -h`
     * e.g. `pipenv run python scripts/run_test.py -I aws_ips.txt -P . -n 2 -i ~/.ssh/829.pem -t 1 -N -l home`
 
+## Running analysis
+1. Run from the `829_project` directory.
+2. The (time or size), type of test, and location need to match an existing test. In addition, specify the test directory and which analysis to run. 
+	* e.g. `python3 scripts/run_analysis.py -P test_analysis -T test_dumps -t 120 -N -l starbucks -B`
+
 ## Other useful scripts
 ### Decompressing zstd to pcap
-```zstd <zstd file> -d -o <new file>```
+```
+zstd <zstd file> -d -o <new file>
+```
 
-### pap RTTs to csv
-```tshark -r <campus_100MB_1c_0l_client_1>.<1> -Y tcp.analysis.ack_rtt -e tcp.analysis.ack_rtt -T fields -E separator=, -E quote=d > rtt.csv```
+### pcap RTTs to csv
+```
+tshark -r <campus_100MB_1c_0l_client_1>.<1> -Y tcp.analysis.ack_rtt -e tcp.analysis.ack_rtt -T fields -E separator=, -E quote=d > rtt.csv
+```
 
 ### pcap to csv
-```tshark -r ~/Documents/CMU/Masters/15829_15848_Project/new_tests/$1 \
+```
+tshark -r ~/Documents/2018_Masters_Fall/15-829_Programmable_Networks/Project/829_project/tmp.pcap \
 -Y "tcp" \
 -e frame.time_relative \
 -e ip.id \
@@ -38,4 +48,5 @@ relative time, src port, dest port, seq, ack, len
 -e tcp.len \
 -T fields \
 -E separator=, \
-> ~/Documents/CMU/Masters/15829_15848_Project/829_project/new_csv/$1.csv ```
+> ~/Documents/CMU/Masters/15829_15848_Project/829_project/new_csv/$1.csv
+```
