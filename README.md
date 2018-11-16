@@ -22,7 +22,7 @@ relative time, src port, dest port, seq, ack, len
 ## Running analysis
 1. Run from the `829_project` directory.
 2. The (time or size), type of test, and location need to match an existing test. In addition, specify the test directory and which analysis to run. 
-	* e.g. `python3 scripts/run_analysis.py -P test_analysis -T test_dumps -t 120 -N -l starbucks -B`
+	* e.g. `python3 scripts/run_analysis.py -P test_analysis -T test_dumps -G graphs -t 120 -L -l zhome -B`
 
 ## Other useful scripts
 ### Decompressing zstd to pcap

@@ -65,13 +65,13 @@ def analysis(args):
     print("Getting necessary files for ", end="")
     analysis_type = ""
     if args.bandwidth:
-        analysis_type = "B"
+        analysis_type = "bandwidth"
         print("bandwidth ",end="")
     elif args.loss:
-        analysis_type = "X"
+        analysis_type = "loss"
         print("loss ",end="")
     elif args.latency:
-        analysis_type = "Y"
+        analysis_type = "latency"
         print("latency ",end="")
     else:
         print("Invalid analysis specified")
@@ -104,15 +104,15 @@ def analysis(args):
     if args.concurrentlong:
         analysis_dir = "{}/{}/{}".format(root_analysis_dir, "concurrent_long", file_name)
         test_dir = "{}/{}/{}".format(root_test_dir, "concurrent_long", file_name)
-        graph_dir = "{}/{}/{}".format(root_graph_dir, "concurrent_long", file_name)
+        graph_dir = "{}/{}/{}/{}".format(root_graph_dir, analysis_type, "concurrent_long", file_name)
     elif args.longshort:
         analysis_dir = "{}/{}/{}".format(root_analysis_dir, "long_and_short", file_name)
         test_dir = "{}/{}/{}".format(root_test_dir, "long_and_short", file_name)
-        graph_dir = "{}/{}/{}".format(root_graph_dir, "long_and_short", file_name)
+        graph_dir = "{}/{}/{}/{}".format(root_graph_dir, analysis_type, "long_and_short", file_name)
     elif args.normal:
         analysis_dir = "{}/{}/{}".format(root_analysis_dir, "normal", file_name)
         test_dir = "{}/{}/{}".format(root_test_dir, "normal", file_name)
-        graph_dir = "{}/{}/{}".format(root_graph_dir, "normal", file_name)
+        graph_dir = "{}/{}/{}/{}".format(root_graph_dir, analysis_type, "normal", file_name)
     else:
         print("NO VALID FILE FORMAT")
         sys.exit(1)

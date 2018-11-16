@@ -5,8 +5,8 @@ import sys
 
 # Default values.
 bucketSize = 0.1
-srcPort = 62388
-destPort = 5201
+srcPort = "62388"
+destPort = "5201"
 prefix = "K"
 #prefix = "M"
 
@@ -37,7 +37,7 @@ def isBetweenPorts(row):
 # and looking at the Len of the message sent.
 # Non-zero Len is data transferred.
 def isDataTransferred(row):
-	length = row[LEN_COL]
+	length = int(row[LEN_COL])
 	if length > 0:
 		return True, length
 	return False, 0
@@ -50,7 +50,7 @@ def isDataTransferred(row):
 
 
 def calculateBandwidth(csvData, srcPort, destPort):
-	print("Calculating bandwidth between port %d and port %d..." % (srcPort, destPort))
+	print("Calculating bandwidth between port %s and port %s..." % (srcPort, destPort))
 
 	bucketI = 0
 	bucketStart = 0
@@ -101,11 +101,10 @@ def plotBandwidth(buckets, bandwidthPerBucket, prefix, filename, graphDir):
 	plt.xlabel("Time (in buckets of %0.2f seconds)" % bucketSize)
 	plt.ylabel("Bandwidth (in data %sB/second)" % prefix)
 	plt.title("Bandwidth vs. Time for file %s" % (filename_no_ext))
-	plt.show()
 	graphfile = graphDir + "/" + filename_no_ext + ".png"
 	print("Saving figure to graph dir {} ...".format(graphDir))
 	plt.savefig(graphfile)
-
+	#plt.show()
 
 # Main.
 def getBandwidth(csvDataForFiles, graphDir):
