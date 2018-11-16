@@ -43,7 +43,7 @@ def make_csv(pcapfile, analysis_type):
         -T fields \
         -E separator=, \
         > {}'.format(pcapfile, csvfile))
-        
+
     os.system("rm {}".format(pcapfile))
     return csvfile
 
@@ -98,22 +98,29 @@ def analysis(args):
     # set up directories
     args.path = args.path.rstrip("/")
     root_analysis_dir = os.path.abspath(args.path)
-    root_test_dir = "/".join(root_analysis_dir.split("/")[:len(root_analysis_dir.split("/"))-1]) + "/" + args.testdir
+    root_dir = "/".join(root_analysis_dir.split("/")[:len(root_analysis_dir.split("/"))-1]) + "/"
+    root_test_dir = root_dir + args.testdir
+    root_graph_dir = root_dir + args.graphdir
     if args.concurrentlong:
         analysis_dir = "{}/{}/{}".format(root_analysis_dir, "concurrent_long", file_name)
         test_dir = "{}/{}/{}".format(root_test_dir, "concurrent_long", file_name)
+        graph_dir = "{}/{}/{}".format(root_graph_dir, "concurrent_long", file_name)
     elif args.longshort:
         analysis_dir = "{}/{}/{}".format(root_analysis_dir, "long_and_short", file_name)
         test_dir = "{}/{}/{}".format(root_test_dir, "long_and_short", file_name)
+        graph_dir = "{}/{}/{}".format(root_graph_dir, "long_and_short", file_name)
     elif args.normal:
         analysis_dir = "{}/{}/{}".format(root_analysis_dir, "normal", file_name)
         test_dir = "{}/{}/{}".format(root_test_dir, "normal", file_name)
+        graph_dir = "{}/{}/{}".format(root_graph_dir, "normal", file_name)
     else:
         print("NO VALID FILE FORMAT")
         sys.exit(1)
     if not os.path.exists(test_dir):
         print("Test dir {} doesn't exist!".format(test_dir))
         sys.exit(1)
+    if not os.path.exists(graph_dir):
+        os.makedirs(graph_dir)
     if not os.path.exists(analysis_dir):
         os.makedirs(analysis_dir)
     print("Analysis_dir {} set up to analyze test_dir {}.".format(analysis_dir, test_dir))
@@ -142,7 +149,7 @@ def analysis(args):
     # run analysis on files
     if args.bandwidth:
         print("Analyzing bandwidth...")
-        bw.getBandwidth(csv_data_for_files)
+        bw.getBandwidth(csv_data_for_files, graph_dir)
     elif args.loss:
         print("Analyzing packet loss...")
 
@@ -168,6 +175,8 @@ required_args.add_argument("-P", "--path",
     help="path to root directory of analysis results\n")
 required_args.add_argument("-T", "--testdir",
     help="directory name of the test directory (not full path)")
+required_args.add_argument("-G", "--graphdir",
+    help="directory name for where the graphs should be saved (not full path)")
 # required_args.add_argument("-n", "--numtests", 
 #     help="number of times to run analysis\n")
 # required_args.add_argument("-i", "--keyfile",

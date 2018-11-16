@@ -8,37 +8,45 @@ bucketSize = 0.1
 srcPort = 62388
 destPort = 5201
 prefix = "K"
+#prefix = "M"
 
 # Constants on where the data is located.
-TIME_NAME = "Time"
-TIME_COL = 1
-INFO_NAME = "Info"
-INFO_COL = 6
+TIME_COL = 0
+SRCPORT_COL = 2
+DESTPORT_COL = 3
+LEN_COL = 6
 
 # Determines whether this message was between the given ports.
 # The order of the ports doesn't matter.
 # Note: 2 spaces between characters.
-def isBetweenPorts(info, srcPort, destPort):
+def isBetweenPorts(row):
 	# See if the message is between src > dest.
-	if ("%d  >  %d" % (srcPort, destPort)) in info:
+	if row[SRCPORT_COL] == srcPort and row[DESTPORT_COL] == destPort:
 		return True
-
-	# See if the message is between dest > src.
-	if ("%d  >  %d" % (destPort, srcPort)) in info:
-		return True
-
 	return False
+	# if ("%s  >  %s" % (srcPort, destPort)) in info:
+	# 	return True
+
+	# # See if the message is between dest > src.
+	# if ("%s  >  %s" % (destPort, srcPort)) in info:
+	# 	return True
+
+	# return False
 
 # Determine if data is transferred by checking the info column
 # and looking at the Len of the message sent.
 # Non-zero Len is data transferred.
-def isDataTransferred(info):
-	for infoField in info.split(" "):
-		if "Len=" in infoField:
-			lenInfo = infoField.split("=")
-			# The amount of data is after the equals sign.
-			return True, int(lenInfo[1])
+def isDataTransferred(row):
+	length = row[LEN_COL]
+	if length > 0:
+		return True, length
 	return False, 0
+	# for infoField in info.split(" "):
+	# 	if "Len=" in infoField:
+	# 		lenInfo = infoField.split("=")
+	# 		# The amount of data is after the equals sign.
+	# 		return True, int(lenInfo[1])
+	# return False, 0
 
 
 def calculateBandwidth(csvData, srcPort, destPort):
@@ -64,8 +72,8 @@ def calculateBandwidth(csvData, srcPort, destPort):
 			dataForBucket = 0  # Reset y-axis sum.
 
 		# Sum the amount of data transferred, if it was in this row.
-		if isBetweenPorts(row[INFO_COL], srcPort, destPort):
-			isData, dataLen = isDataTransferred(row[INFO_COL])
+		if isBetweenPorts(row):
+			isData, dataLen = isDataTransferred(row)
 			if isData:
 				dataForBucket += dataLen  # Length of data transferred.
 
@@ -86,17 +94,21 @@ def divideByBuckets(buckets, dataPerBucketList, prefix):
 	return bandwidthPerBucket
 
 # Plot.
-def plotBandwidth(buckets, bandwidthPerBucket, prefix, file):
+def plotBandwidth(buckets, bandwidthPerBucket, prefix, filename, graphDir):
 	print("Plotting bandwidth...")
+	filename_no_ext = filename.split(".")[0]
 	plt.plot(buckets, bandwidthPerBucket)
 	plt.xlabel("Time (in buckets of %0.2f seconds)" % bucketSize)
 	plt.ylabel("Bandwidth (in data %sB/second)" % prefix)
-	plt.title("Bandwidth vs. Time for file %s" % file)
+	plt.title("Bandwidth vs. Time for file %s" % (filename_no_ext))
 	plt.show()
+	graphfile = graphDir + "/" + filename_no_ext + ".png"
+	print("Saving figure to graph dir {} ...".format(graphDir))
+	plt.savefig(graphfile)
 
 
 # Main.
-def getBandwidth(csvDataForFiles):
+def getBandwidth(csvDataForFiles, graphDir):
 
 	for filename in csvDataForFiles:
 		print("Getting bandwidth calculations on file %s wtih bucket size %0.3f..." % (filename, bucketSize))
@@ -110,8 +122,8 @@ def getBandwidth(csvDataForFiles):
 		bandwidthPerBucket = divideByBuckets(buckets, dataPerBucketList, prefix)
 		print("Got bandwidth per bucket...")
 
-		plotBandwidth(buckets, bandwidthPerBucket, prefix, file)
-		print("Calculations on file %s complete." % file)
+		plotBandwidth(buckets, bandwidthPerBucket, prefix, filename, graphDir)
+		print("Calculations on file %s complete." % filename)
 
 # Command-line flags are defined here.
 # def parse_arguments():
