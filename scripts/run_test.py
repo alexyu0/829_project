@@ -116,6 +116,8 @@ def client_tcpdump(ips, test_dir, i, file_name, file_name_short, args):
         client_tcpdump_procs.append(subprocess.Popen([cmd],
             shell=True))
         filenames.append(fname)
+        if (j == 0):
+            time.sleep(10) # time to enter password
     return (client_tcpdump_procs, filenames)
 
 def kill_client_tcpdump(client_tcpdump_procs, filenames, test_dir):
@@ -200,8 +202,6 @@ def test(args):
         client_tcpdump_procs, c_t_filenames = client_tcpdump(
             ips, test_dir, i, file_name, file_name_short, args)
         print("...started local tcpdump")
-        if (i == 1):
-            time.sleep(10) # give you time to enter password
 
         # remote ssh start iperf server
         iperf_ssh_info, s_i_filenames = server_iperf(

@@ -1,160 +1,108 @@
 -----------------------------------------------------------
 Server listening on 5201
 -----------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58262
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
+Accepted connection from 162.210.198.55, port 52868
+[  5] local 172.31.42.9 port 5201 connected to 162.210.198.55 port 62388
 [ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec  1.01 MBytes  8.43 Mbits/sec   36   31.1 KBytes       
+[  5]   0.00-1.00   sec  1.48 MBytes  12.4 Mbits/sec    0    118 KBytes       
+[  5]   1.00-1.05   sec   190 KBytes  28.7 Mbits/sec    0    125 KBytes       
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.02   sec  1.01 MBytes  8.26 Mbits/sec   36             sender
+[  5]   0.00-1.05   sec  1.66 MBytes  13.2 Mbits/sec    0             sender
 -----------------------------------------------------------
 Server listening on 5201
 -----------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58263
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
+Accepted connection from 162.210.198.55, port 52869
+[  5] local 172.31.42.9 port 5201 connected to 162.210.198.55 port 62388
 [ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec   619 KBytes  5.07 Mbits/sec    1   26.9 KBytes       
+[  5]   0.00-1.00   sec  1.79 MBytes  15.0 Mbits/sec    0    140 KBytes       
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec   619 KBytes  4.90 Mbits/sec    2             sender
+[  5]   0.00-1.06   sec  1.79 MBytes  14.2 Mbits/sec    0             sender
 -----------------------------------------------------------
 Server listening on 5201
 -----------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58266
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
+Accepted connection from 162.210.198.55, port 52870
+[  5] local 172.31.42.9 port 5201 connected to 162.210.198.55 port 62388
 [ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec   499 KBytes  4.09 Mbits/sec    9   21.2 KBytes       
-[  5]   1.00-1.03   sec  63.6 KBytes  15.8 Mbits/sec    0   22.6 KBytes       
+[  5]   0.00-1.00   sec  1.30 MBytes  10.9 Mbits/sec    7   72.4 KBytes       
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec   563 KBytes  4.46 Mbits/sec    9             sender
+[  5]   0.00-1.06   sec  1.30 MBytes  10.3 Mbits/sec    7             sender
 -----------------------------------------------------------
 Server listening on 5201
 -----------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58267
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
+Accepted connection from 162.210.198.55, port 52871
+[  5] local 172.31.42.9 port 5201 connected to 162.210.198.55 port 62388
 [ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec  1.47 MBytes  12.3 Mbits/sec    0   73.5 KBytes       
-[  5]   1.00-1.03   sec   191 KBytes  62.6 Mbits/sec    0   76.4 KBytes       
+[  5]   0.00-1.00   sec  1.72 MBytes  14.4 Mbits/sec   31   64.5 KBytes       
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.65 MBytes  13.5 Mbits/sec    0             sender
+[  5]   0.00-1.05   sec  1.72 MBytes  13.7 Mbits/sec   31             sender
 -----------------------------------------------------------
 Server listening on 5201
 -----------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58268
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
+Accepted connection from 162.210.198.55, port 52872
+[  5] local 172.31.42.9 port 5201 connected to 162.210.198.55 port 62388
 [ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec  1.36 MBytes  11.4 Mbits/sec   11   43.8 KBytes       
-[  5]   1.00-1.03   sec   127 KBytes  38.4 Mbits/sec    0   45.2 KBytes       
+[  5]   0.00-1.00   sec  1.84 MBytes  15.5 Mbits/sec    0    155 KBytes       
+[  5]   1.00-1.06   sec   190 KBytes  25.3 Mbits/sec    0    163 KBytes       
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.49 MBytes  12.1 Mbits/sec   11             sender
+[  5]   0.00-1.06   sec  2.03 MBytes  16.0 Mbits/sec    0             sender
 -----------------------------------------------------------
 Server listening on 5201
 -----------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58269
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
+Accepted connection from 162.210.198.55, port 52875
+[  5] local 172.31.42.9 port 5201 connected to 162.210.198.55 port 62388
 [ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec  1.05 MBytes  8.79 Mbits/sec   12   29.7 KBytes       
+[  5]   0.00-1.00   sec  2.03 MBytes  17.0 Mbits/sec    0    168 KBytes       
+[  5]   1.00-1.05   sec   253 KBytes  38.8 Mbits/sec    0    176 KBytes       
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.05 MBytes  8.50 Mbits/sec   12             sender
+[  5]   0.00-1.05   sec  2.28 MBytes  18.1 Mbits/sec    0             sender
 -----------------------------------------------------------
 Server listening on 5201
 -----------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58270
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
+Accepted connection from 162.210.198.55, port 52878
+[  5] local 172.31.42.9 port 5201 connected to 162.210.198.55 port 62388
 [ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec   936 KBytes  7.67 Mbits/sec    9   19.8 KBytes       
+[  5]   0.00-1.00   sec  1.60 MBytes  13.4 Mbits/sec   50   38.2 KBytes       
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec   936 KBytes  7.47 Mbits/sec    9             sender
+[  5]   0.00-1.05   sec  1.60 MBytes  12.7 Mbits/sec   50             sender
 -----------------------------------------------------------
 Server listening on 5201
 -----------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58271
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
+Accepted connection from 162.210.198.55, port 52881
+[  5] local 172.31.42.9 port 5201 connected to 162.210.198.55 port 62388
 [ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec  1.11 MBytes  9.32 Mbits/sec   21   28.3 KBytes       
+[  5]   0.00-1.00   sec   821 KBytes  6.73 Mbits/sec   28   32.9 KBytes       
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.11 MBytes  9.05 Mbits/sec   21             sender
+[  5]   0.00-1.06   sec   821 KBytes  6.38 Mbits/sec   28             sender
 -----------------------------------------------------------
 Server listening on 5201
 -----------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58272
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
+Accepted connection from 162.210.198.55, port 52882
+[  5] local 172.31.42.9 port 5201 connected to 162.210.198.55 port 62388
 [ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec   503 KBytes  4.12 Mbits/sec   24   11.3 KBytes       
+[  5]   0.00-1.00   sec  1.08 MBytes  9.09 Mbits/sec   22   44.8 KBytes       
+[  5]   1.00-1.06   sec   142 KBytes  18.7 Mbits/sec    0   64.5 KBytes       
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec   503 KBytes  4.01 Mbits/sec   24             sender
+[  5]   0.00-1.06   sec  1.22 MBytes  9.65 Mbits/sec   22             sender
 -----------------------------------------------------------
 Server listening on 5201
 -----------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58274
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
+Accepted connection from 162.210.198.55, port 52883
+[  5] local 172.31.42.9 port 5201 connected to 162.210.198.55 port 62388
 [ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec   634 KBytes  5.19 Mbits/sec   11   21.2 KBytes       
+[  5]   0.00-1.00   sec  1.18 MBytes  9.90 Mbits/sec    0   89.5 KBytes       
+[  5]   1.00-1.06   sec   126 KBytes  18.8 Mbits/sec    0   93.5 KBytes       
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.02   sec   634 KBytes  5.06 Mbits/sec   11             sender
------------------------------------------------------------
-Server listening on 5201
------------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58275
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
-[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec   735 KBytes  6.02 Mbits/sec    1   29.7 KBytes       
-[  5]   1.00-1.03   sec   127 KBytes  38.6 Mbits/sec    0   31.1 KBytes       
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec   863 KBytes  6.88 Mbits/sec    1             sender
------------------------------------------------------------
-Server listening on 5201
------------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58276
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
-[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec   956 KBytes  7.83 Mbits/sec    6   32.5 KBytes       
-[  5]   1.00-1.03   sec   127 KBytes  42.0 Mbits/sec    0   32.5 KBytes       
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.06 MBytes  8.66 Mbits/sec    6             sender
------------------------------------------------------------
-Server listening on 5201
------------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58277
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
-[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec  1.04 MBytes  8.73 Mbits/sec    9   33.9 KBytes       
-[  5]   1.00-1.03   sec   127 KBytes  39.1 Mbits/sec    0   35.4 KBytes       
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.17 MBytes  9.52 Mbits/sec    9             sender
------------------------------------------------------------
-Server listening on 5201
------------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58278
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
-[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec  1.25 MBytes  10.5 Mbits/sec   19   38.2 KBytes       
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.02   sec  1.25 MBytes  10.3 Mbits/sec   19             sender
------------------------------------------------------------
-Server listening on 5201
------------------------------------------------------------
-Accepted connection from 50.248.80.139, port 58279
-[  5] local 172.31.42.9 port 5201 connected to 50.248.80.139 port 62388
-[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
-[  5]   0.00-1.00   sec  2.04 MBytes  17.1 Mbits/sec    0   96.2 KBytes       
-[  5]   1.00-1.03   sec   255 KBytes  80.1 Mbits/sec    0    102 KBytes       
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  2.29 MBytes  18.7 Mbits/sec    0             sender
+[  5]   0.00-1.06   sec  1.30 MBytes  10.4 Mbits/sec    0             sender
 -----------------------------------------------------------
 Server listening on 5201
 -----------------------------------------------------------

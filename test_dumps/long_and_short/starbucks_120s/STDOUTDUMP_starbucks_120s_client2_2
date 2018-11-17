@@ -1,165 +1,110 @@
 Connecting to host 54.164.173.148, port 5201
 Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
+[  5] local 10.6.6.248 port 62388 connected to 54.164.173.148 port 5201
 [ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec   754 KBytes  6.17 Mbits/sec                  
+[  5]   0.00-1.01   sec  1.28 MBytes  10.7 Mbits/sec                  
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.02   sec  1.01 MBytes  8.26 Mbits/sec   36             sender
-[  5]   0.00-1.00   sec   754 KBytes  6.17 Mbits/sec                  receiver
+[  5]   0.00-1.05   sec  1.66 MBytes  13.2 Mbits/sec    0             sender
+[  5]   0.00-1.01   sec  1.28 MBytes  10.7 Mbits/sec                  receiver
 
 iperf Done.
 Connecting to host 54.164.173.148, port 5201
 Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
+[  5] local 10.6.6.248 port 62388 connected to 54.164.173.148 port 5201
 [ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec   503 KBytes  4.11 Mbits/sec                  
+[  5]   0.00-1.00   sec  1.54 MBytes  12.9 Mbits/sec                  
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec   619 KBytes  4.90 Mbits/sec    2             sender
-[  5]   0.00-1.00   sec   503 KBytes  4.11 Mbits/sec                  receiver
+[  5]   0.00-1.06   sec  1.79 MBytes  14.2 Mbits/sec    0             sender
+[  5]   0.00-1.00   sec  1.54 MBytes  12.9 Mbits/sec                  receiver
 
 iperf Done.
 Connecting to host 54.164.173.148, port 5201
 Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
+[  5] local 10.6.6.248 port 62388 connected to 54.164.173.148 port 5201
 [ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec   423 KBytes  3.46 Mbits/sec                  
+[  5]   0.00-1.00   sec  1.10 MBytes  9.21 Mbits/sec                  
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec   563 KBytes  4.46 Mbits/sec    9             sender
-[  5]   0.00-1.00   sec   423 KBytes  3.46 Mbits/sec                  receiver
+[  5]   0.00-1.06   sec  1.30 MBytes  10.3 Mbits/sec    7             sender
+[  5]   0.00-1.00   sec  1.10 MBytes  9.21 Mbits/sec                  receiver
 
 iperf Done.
 Connecting to host 54.164.173.148, port 5201
 Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
+[  5] local 10.6.6.248 port 62388 connected to 54.164.173.148 port 5201
 [ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec  1.24 MBytes  10.4 Mbits/sec                  
+[  5]   0.00-1.00   sec  1.42 MBytes  11.9 Mbits/sec                  
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.65 MBytes  13.5 Mbits/sec    0             sender
-[  5]   0.00-1.00   sec  1.24 MBytes  10.4 Mbits/sec                  receiver
+[  5]   0.00-1.05   sec  1.72 MBytes  13.7 Mbits/sec   31             sender
+[  5]   0.00-1.00   sec  1.42 MBytes  11.9 Mbits/sec                  receiver
 
 iperf Done.
 Connecting to host 54.164.173.148, port 5201
 Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
-[ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec  1.15 MBytes  9.63 Mbits/sec                  
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.49 MBytes  12.1 Mbits/sec   11             sender
-[  5]   0.00-1.00   sec  1.15 MBytes  9.63 Mbits/sec                  receiver
-
-iperf Done.
-Connecting to host 54.164.173.148, port 5201
-Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
-[ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec   850 KBytes  6.96 Mbits/sec                  
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.05 MBytes  8.50 Mbits/sec   12             sender
-[  5]   0.00-1.00   sec   850 KBytes  6.96 Mbits/sec                  receiver
-
-iperf Done.
-Connecting to host 54.164.173.148, port 5201
-Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
-[ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec   786 KBytes  6.44 Mbits/sec                  
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec   936 KBytes  7.47 Mbits/sec    9             sender
-[  5]   0.00-1.00   sec   786 KBytes  6.44 Mbits/sec                  receiver
-
-iperf Done.
-Connecting to host 54.164.173.148, port 5201
-Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
-[ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec   912 KBytes  7.46 Mbits/sec                  
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.11 MBytes  9.05 Mbits/sec   21             sender
-[  5]   0.00-1.00   sec   912 KBytes  7.46 Mbits/sec                  receiver
-
-iperf Done.
-Connecting to host 54.164.173.148, port 5201
-Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
-[ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec   399 KBytes  3.25 Mbits/sec                  
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec   503 KBytes  4.01 Mbits/sec   24             sender
-[  5]   0.00-1.00   sec   399 KBytes  3.25 Mbits/sec                  receiver
-
-iperf Done.
-Connecting to host 54.164.173.148, port 5201
-Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
-[ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec   516 KBytes  4.23 Mbits/sec                  
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.02   sec   634 KBytes  5.06 Mbits/sec   11             sender
-[  5]   0.00-1.00   sec   516 KBytes  4.23 Mbits/sec                  receiver
-
-iperf Done.
-Connecting to host 54.164.173.148, port 5201
-Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
-[ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec   653 KBytes  5.34 Mbits/sec                  
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec   863 KBytes  6.88 Mbits/sec    1             sender
-[  5]   0.00-1.00   sec   653 KBytes  5.34 Mbits/sec                  receiver
-
-iperf Done.
-Connecting to host 54.164.173.148, port 5201
-Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
-[ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec   857 KBytes  7.01 Mbits/sec                  
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.06 MBytes  8.66 Mbits/sec    6             sender
-[  5]   0.00-1.00   sec   857 KBytes  7.01 Mbits/sec                  receiver
-
-iperf Done.
-Connecting to host 54.164.173.148, port 5201
-Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
-[ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec   932 KBytes  7.63 Mbits/sec                  
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  1.17 MBytes  9.52 Mbits/sec    9             sender
-[  5]   0.00-1.00   sec   932 KBytes  7.63 Mbits/sec                  receiver
-
-iperf Done.
-Connecting to host 54.164.173.148, port 5201
-Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
-[ ID] Interval           Transfer     Bitrate
-[  5]   0.00-1.00   sec  1.03 MBytes  8.62 Mbits/sec                  
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.02   sec  1.25 MBytes  10.3 Mbits/sec   19             sender
-[  5]   0.00-1.00   sec  1.03 MBytes  8.62 Mbits/sec                  receiver
-
-iperf Done.
-Connecting to host 54.164.173.148, port 5201
-Reverse mode, remote host 54.164.173.148 is sending
-[  5] local 172.31.99.86 port 62388 connected to 54.164.173.148 port 5201
+[  5] local 10.6.6.248 port 62388 connected to 54.164.173.148 port 5201
 [ ID] Interval           Transfer     Bitrate
 [  5]   0.00-1.00   sec  1.72 MBytes  14.4 Mbits/sec                  
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bitrate         Retr
-[  5]   0.00-1.03   sec  2.29 MBytes  18.7 Mbits/sec    0             sender
+[  5]   0.00-1.06   sec  2.03 MBytes  16.0 Mbits/sec    0             sender
 [  5]   0.00-1.00   sec  1.72 MBytes  14.4 Mbits/sec                  receiver
+
+iperf Done.
+Connecting to host 54.164.173.148, port 5201
+Reverse mode, remote host 54.164.173.148 is sending
+[  5] local 10.6.6.248 port 62388 connected to 54.164.173.148 port 5201
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-1.00   sec  1.79 MBytes  15.0 Mbits/sec                  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-1.05   sec  2.28 MBytes  18.1 Mbits/sec    0             sender
+[  5]   0.00-1.00   sec  1.79 MBytes  15.0 Mbits/sec                  receiver
+
+iperf Done.
+Connecting to host 54.164.173.148, port 5201
+Reverse mode, remote host 54.164.173.148 is sending
+[  5] local 10.6.6.248 port 62388 connected to 54.164.173.148 port 5201
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-1.00   sec  1.28 MBytes  10.7 Mbits/sec                  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-1.05   sec  1.60 MBytes  12.7 Mbits/sec   50             sender
+[  5]   0.00-1.00   sec  1.28 MBytes  10.7 Mbits/sec                  receiver
+
+iperf Done.
+Connecting to host 54.164.173.148, port 5201
+Reverse mode, remote host 54.164.173.148 is sending
+[  5] local 10.6.6.248 port 62388 connected to 54.164.173.148 port 5201
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-1.01   sec   640 KBytes  5.21 Mbits/sec                  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-1.06   sec   821 KBytes  6.38 Mbits/sec   28             sender
+[  5]   0.00-1.01   sec   640 KBytes  5.21 Mbits/sec                  receiver
+
+iperf Done.
+Connecting to host 54.164.173.148, port 5201
+Reverse mode, remote host 54.164.173.148 is sending
+[  5] local 10.6.6.248 port 62388 connected to 54.164.173.148 port 5201
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-1.00   sec  1015 KBytes  8.31 Mbits/sec                  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-1.06   sec  1.22 MBytes  9.65 Mbits/sec   22             sender
+[  5]   0.00-1.00   sec  1015 KBytes  8.31 Mbits/sec                  receiver
+
+iperf Done.
+Connecting to host 54.164.173.148, port 5201
+Reverse mode, remote host 54.164.173.148 is sending
+[  5] local 10.6.6.248 port 62388 connected to 54.164.173.148 port 5201
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-1.00   sec  1.05 MBytes  8.80 Mbits/sec                  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-1.06   sec  1.30 MBytes  10.4 Mbits/sec    0             sender
+[  5]   0.00-1.00   sec  1.05 MBytes  8.80 Mbits/sec                  receiver
 
 iperf Done.
