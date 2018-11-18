@@ -156,6 +156,7 @@ required_args.add_argument("-l", "--location",
 # required_args.add_argument("-I", "--ips",
 #     help="file containing list of server IPs, \n*** DON'T INCLUDE ENDPOINT OR TRIAL # ***\n")
 required_args.add_argument("-p", "--processcsv", 
+    action="store_true",
     help="only process csvs\n")
 required_args.add_argument("-P", "--path", 
     help="path to root directory of analysis results\n")
