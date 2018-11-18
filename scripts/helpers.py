@@ -1,7 +1,46 @@
-import constants
 import csv
 import os
 import sys
+from collections import defaultdict
+
+import constants
+
+def group_files(file_to_csvrows, pair):
+    """
+    Groups multiple runs of a connection together, pairing client and server if
+    specified
+    """
+    # if pair, is conn # -> run # -> tuple of data for paired client and server
+    # if not pair, is endpoint conn # -> run # -> tuple of data for each
+    if pair:
+        runs = {}
+    else:
+        runs = defaultdict(list)
+    for file_name in file_to_csvrows:
+        if file_name.endswith(".zst"):
+            f, pcap, zst = file_name.split(".")
+            
+            # assumes files are named as location_duration_endpoint_run
+            l, d, e, r = f.split("_")
+
+            digit_i = -1
+            endpoint_no = ""
+            while e[digit_i].isdigit():
+                endpoint_no = e[digit_i] + endpoint_no
+                digit_i -= 1
+            endpoint_no = int(endpoint_no)
+            endpoint = str(e[0:(digit_i + 1)])
+
+            if pair:
+                if endpoint_no not in runs:
+                    runs[endpoint_no] = {}
+                if r not in runs[endpoint_no]:
+                    runs[endpoint_no][r] = {}
+                runs[endpoint_no][r][endpoint] = file_to_csvrows[file_name]
+            else:
+                runs[e].append(file_to_csvrows[file_name])
+    
+    return runs
 
 def parseCSV(file):
     """
@@ -45,13 +84,13 @@ def calculate_time_bucket_data(csvData, data_fn):
 def make_csv(pcapfile, analysis_type, save, root_csv_dir):
     csvfile = pcapfile.split(".")[0] + ".csv"
     if save:
-        if analysis_type == "Y":
+        if analysis_type == "latency":
             csvfile = "{}/rtt/{}".format(root_csv_dir, os.path.basename(csvfile))
         else:
             csvfile = "{}/info/{}".format(root_csv_dir, os.path.basename(csvfile))
 
     # checks if csv already exists first
-    if analysis_type == "Y": # latency
+    if analysis_type == "latency": # latency
         if not os.path.exists(csvfile):
             os.system("tshark -r {} \
                 -Y tcp.analysis.ack_rtt \

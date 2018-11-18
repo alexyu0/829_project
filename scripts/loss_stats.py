@@ -5,6 +5,7 @@ from collections import defaultdict
 import pprint
 
 import constants
+import helpers
 
 # **************************** DATA EXTRACTION ****************************** #
 def get_lost_packets(client_data, server_data):
@@ -244,33 +245,12 @@ def analyze_loss(file_to_csvrows, graph_dir, test_str):
     """
     Runs analysis on data for some files, assumed to be from the same test
     """
-    name_pre = None 
-    runs = {} # conn # -> run # -> tuple of data for paired client and server
+    l, d, e, r = file_to_csvrows.keys()[0].split("_")
+    name_pre = "{}_{}_{}_".format(test_str, l, d)
 
     # group by connection number and run number
     print("Analyzing loss...")
-    for file_name in file_to_csvrows:
-        if file_name.endswith(".zst"):
-            f, pcap, zst = file_name.split(".")
-            
-            # assumes files are named as location_duration_endpoint_run
-            l, d, e, r = f.split("_")
-            if name_pre is None:
-                name_pre = "{}_{}_{}_".format(test_str, l, d)
-
-            digit_i = -1
-            endpoint_no = ""
-            while e[digit_i].isdigit():
-                endpoint_no = e[digit_i] + endpoint_no
-                digit_i -= 1
-            endpoint_no = int(endpoint_no)
-            endpoint = str(e[0:(digit_i + 1)])
-
-            if endpoint_no not in runs:
-                runs[endpoint_no] = {}
-            if r not in runs[endpoint_no]:
-                runs[endpoint_no][r] = {}
-            runs[endpoint_no][r][endpoint] = file_to_csvrows[file_name]
+    runs = helpers.group_files(file_to_csvrows, test_str, True)
 
     # do the thing
     for conn_no in runs:
