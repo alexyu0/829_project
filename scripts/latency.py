@@ -11,17 +11,8 @@ minBucket = 0.0
 maxBucket = 0.0009
 
 
-# Raw CSV parser, includes the table headers.
-def parseCSV(file):
-	csvData = []
-	with open(file, newline='') as csvfile:
-		csvReader = csv.reader(csvfile)
-		for row in csvReader:
-			csvData.append(row)
-	return csvData
-
 # Plot possibly multiple files for latency.
-def plotLatency(buckets, results, files):
+def plotLatency(buckets, results, files, graphDir):
 	xaxis = buckets
 
 	print("buckets", buckets)
@@ -37,7 +28,10 @@ def plotLatency(buckets, results, files):
 	plt.xlabel("Latency(in buckets of %0.2f seconds)" % bucketSize)
 	plt.ylabel("Number of packets")
 	plt.legend()
-	plt.show()
+	#plt.show()
+	graphfile = graphDir + "/" + filename_no_ext + ".png"
+	print("Saving figure to graph dir {} ...".format(graphDir))
+	plt.savefig(graphfile)
 
 
 # Group the latencies (elements of CSV data) by the number of times they occur
@@ -58,10 +52,7 @@ def sortIntoBuckets(buckets, csvData):
 	return countsInBuckets
 
 # Main.
-def getLatency():
-	if len(sys.argv) <= 1:
-		print("Please give at least one file as an argument.")
-		exit()
+def getLatency(csvDataForFiles, graphDir):
 
 	# 2D array of results. Indexing into results gives the data for the y-axis.
 	results = []
@@ -70,7 +61,13 @@ def getLatency():
 	numBuckets = int((maxBucket - minBucket) / float(bucketSize))
 	buckets = np.linspace(minBucket, maxBucket, num=numBuckets, endpoint=False)
 
-	for argNum in range(1, len(sys.argv)):
+	for filename in csvDataForFiles:
+
+		# partition into client or server
+
+
+
+
 		file = sys.argv[argNum]
 		files.append(file)
 		print("Getting bandwidth calculations on file %s wtih bucket size %0.3f..." % (file, bucketSize))
@@ -83,10 +80,6 @@ def getLatency():
 		# Group latency values into buckets to get tail latency (x-axis)
 		# vs. number of packets (y-axis).
 
-		#buckets, dataPerBucketList = calculateBandwidth(csvData, srcPort, destPort)
-
-		#bandwidthPerBucket = divideByBuckets(buckets, dataPerBucketList, prefix)
-
 		countsInBuckets = sortIntoBuckets(buckets, csvData)
 
 		results.append(countsInBuckets)
@@ -94,8 +87,8 @@ def getLatency():
 		print("Calculations on file %s complete." % file)
 
 	print("Plotting all files...")
-	plotLatency(buckets, results, files)
+	plotLatency(buckets, results, files, graphDir)
 	print("Plotting complete.")
 
 
-getLatency()
+#getLatency()

@@ -14,6 +14,7 @@ from collections import defaultdict
 from constants import PORT_START
 from loss_stats import analyze_loss
 from helpers import make_csv, decompress, compress
+from latency import getLatency
 
 # removes csv file after extracting csv data
 def parseCSV(file, save):
@@ -139,7 +140,7 @@ def analysis(args):
         analyze_loss(csv_data_for_files, graph_dir, test_str)
     elif args.latency:
         print("Analyzing per packet latency...")
-        #getLatency(csv_data_for_files)
+        getLatency(csv_data_for_files, graph_dir)
         
     print("Analysis complete.")
     return
