@@ -16,15 +16,17 @@ from loss_stats import analyze_loss
 from helpers import make_csv, decompress, compress
 
 # removes csv file after extracting csv data
-def parseCSV(file):
+def parseCSV(file, save):
     csvData = []
     with open(file, newline='') as csvfile:
         csvReader = csv.reader(csvfile)
         for row in csvReader:
             csvData.append(row)
     csvfile.close()
-    # remove csv file after use.
-    os.system("rm {}".format(file))
+
+    # remove csv file after use if not save
+    if not save:
+        os.system("rm {}".format(file))
     return csvData
 
 def analysis(args):
@@ -113,15 +115,16 @@ def analysis(args):
                 print("Failed to create pcap file for {}".format(file_name))
                 sys.exit(1)
 
-            # make different csv depending on the test
+            # make different csv depending on the test, remove pcap too
             print("Parsing {} to csv...".format(os.path.basename(file_name)))
-            csvfile = make_csv(pcapfile, analysis_type, root_csv_dir) # removes pcapfile too
+            csvfile = make_csv(pcapfile, analysis_type, args.savecsv, root_csv_dir)
             if not os.path.exists(csvfile):
                 print("Failed to create csv file for {}".format(file_name))
                 sys.exit(1)
 
             # extract data for each file
-            csv_data_for_files[file_name] = parseCSV(csvfile) # removes csvfile
+            print("Extracting from {}...".format(os.path.basename(csvfile)))
+            csv_data_for_files[file_name] = parseCSV(csvfile, args.savecsv) # removes csvfile
             print("...{} done".format(os.path.basename(file_name)))
 
     # run analysis on files
@@ -151,15 +154,15 @@ required_args.add_argument("-l", "--location",
 #     help="file containing list of server IPs, \n*** DON'T INCLUDE ENDPOINT OR TRIAL # ***\n")
 required_args.add_argument("-P", "--path", 
     help="path to root directory of analysis results\n")
+required_args.add_argument("-T", "--testdir",
+    help="directory name of the test directory (not full path)")
+required_args.add_argument("-G", "--graphdir",
+    help="directory name for where the graphs should be saved (not full path)")
 required_args.add_argument("-c", "--csvdir", 
     help="path to root directory of where to store csvs\n")
 required_args.add_argument("-S", "--savecsv",
     action="store_true",
     help="save CSVs and look for saved CSVs\n")
-required_args.add_argument("-T", "--testdir",
-    help="directory name of the test directory (not full path)")
-required_args.add_argument("-G", "--graphdir",
-    help="directory name for where the graphs should be saved (not full path)")
 # required_args.add_argument("-n", "--numtests", 
 #     help="number of times to run analysis\n")
 # required_args.add_argument("-i", "--keyfile",

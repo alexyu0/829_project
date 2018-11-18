@@ -42,23 +42,17 @@ def calculate_time_bucket_data(csvData, data_fn):
     return time_buckets, data_buckets
     
 # removes pcap file after creating csv file
-def make_csv(pcapfile, analysis_type, root_csv_dir):
+def make_csv(pcapfile, analysis_type, save, root_csv_dir):
     csvfile = pcapfile.split(".")[0] + ".csv"
+    if save:
+        if analysis_type == "Y":
+            csvfile = "{}/rtt/{}".format(root_csv_dir, os.path.basename(csvfile))
+        else:
+            csvfile = "{}/info/{}".format(root_csv_dir, os.path.basename(csvfile))
 
     # checks if csv already exists first
     if analysis_type == "Y": # latency
-        if root_csv_dir != "":
-            csvfile_path = "{}/rtt/{}".format(root_csv_dir, os.path.basename(csvfile))
-            if os.path.exists(csvfile_path):
-                return csvfile_path
-
-            os.system("tshark -r {} \
-                -Y tcp.analysis.ack_rtt \
-                -e tcp.analysis.ack_rtt \
-                -T fields \
-                -E separator=, \
-                -E quote=d > {}".format(pcapfile, csvfile_path))
-        else:
+        if not os.path.exists(csvfile):
             os.system("tshark -r {} \
                 -Y tcp.analysis.ack_rtt \
                 -e tcp.analysis.ack_rtt \
@@ -66,24 +60,7 @@ def make_csv(pcapfile, analysis_type, root_csv_dir):
                 -E separator=, \
                 -E quote=d > {}".format(pcapfile, csvfile))
     else:
-        if root_csv_dir != "":
-            csvfile_path = "{}/info/{}".format(root_csv_dir, os.path.basename(csvfile))
-            if os.path.exists(csvfile_path):
-                return csvfile_path
-
-            os.system('tshark -r {} \
-                -Y "tcp" \
-                -e frame.time_relative \
-                -e ip.id \
-                -e tcp.srcport \
-                -e tcp.dstport \
-                -e tcp.seq \
-                -e tcp.ack \
-                -e tcp.len \
-                -T fields \
-                -E separator=, \
-                > {}'.format(pcapfile, csvfile_path))
-        else:
+        if not os.path.exists(csvfile):
             os.system('tshark -r {} \
                 -Y "tcp" \
                 -e frame.time_relative \
@@ -103,7 +80,7 @@ def make_csv(pcapfile, analysis_type, root_csv_dir):
 # takes a .zst file, doesn't remove the compressed version
 def decompress(zstfile):
     pcapfile = zstfile.split(".zst")[0]
-    #os.system("zstd {} -d -o {}".format(zstfile, pcapfile))
+    os.system("zstd {} -d -o {}".format(zstfile, pcapfile))
     return pcapfile
 
 # takes a pcap file
