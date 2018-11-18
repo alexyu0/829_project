@@ -22,8 +22,7 @@ def get_lost_packets(client_data, server_data):
 
     # parse data to populate respective dicts
     client_in_data = [] # data to match against for server_out_packets
-    for row_all in client_data:
-        row = row_all.split(",")
+    for row in client_data:
         if row[constants.SRC_PORT_COL] == client_port and row[constants.DST_PORT_COL] == server_port:
             payload_size = int(row[constants.DATA_LEN_COL])
             seq = int(row[constants.SEQ_NUM_COL])
@@ -49,8 +48,7 @@ def get_lost_packets(client_data, server_data):
             client_in_data.append(row)
     
     server_in_data = [] # data to match against for client_out_packets
-    for row_all in server_data:
-        row = row_all.split(",")
+    for row in server_data:
         if row[constants.SRC_PORT_COL] == server_port and row[constants.DST_PORT_COL] == client_port:
             payload_size = int(row[constants.DATA_LEN_COL])
             seq = int(row[constants.SEQ_NUM_COL])
@@ -174,10 +172,10 @@ def loss_timescale(data_lines, graph_individual=False):
     return (time_buckets, data_buckets)
 
 def compute_average_hist(loss_bursts):
-    average_loss_bursts = defaultdict(0)
+    average_loss_bursts = defaultdict(int)
     for hist in loss_bursts:
         for length in hist:
-            average_loss_bursts[length] += loss_bursts[length]
+            average_loss_bursts[length] += hist[length]
     
     for length in average_loss_bursts:
         average_loss_bursts[length] = int(average_loss_bursts[length] / len(loss_bursts))
@@ -266,26 +264,29 @@ def analyze_loss(file_to_csvrows, graph_dir, test_str):
                 endpoint_no = e[digit_i] + endpoint_no
                 digit_i -= 1
             endpoint_no = int(endpoint_no)
-            endpoint = e[0:(digit_i + 1)]
+            endpoint = str(e[0:(digit_i + 1)])
 
             if endpoint_no not in runs:
-                runs[endpoint_no] = defaultdict(list)
+                runs[endpoint_no] = {}
+            if r not in runs[endpoint_no]:
+                runs[endpoint_no][r] = {}
             runs[endpoint_no][r][endpoint] = file_to_csvrows[file_name]
 
     # do the thing
     for conn_no in runs:
         print("analyzing connection {}...".format(conn_no))
-        loss_hists = {}
-        loss_timescales = {}
+        loss_hists = defaultdict(list)
+        loss_timescales = defaultdict(list)
         for run_no in runs[conn_no]:
             print("analyzing connection {} run {}...".format(conn_no, run_no))
             client_data = runs[conn_no][run_no]["client"]
             server_data = runs[conn_no][run_no]["server"]
 
             # run statistics analysis
-            print("processing client...")
+            print("figuring out lost packets...")
             client_loss_data, server_loss_data = get_lost_packets(
                 client_data, server_data)
+            print("processing client...")
             client_loss_bursts = loss_length_hist(client_loss_data)
             client_loss_timescale = loss_timescale(client_loss_data)
             print("processing server...")
@@ -298,7 +299,7 @@ def analyze_loss(file_to_csvrows, graph_dir, test_str):
             loss_timescales[client_e].append(client_loss_timescale)
             loss_hists[server_e].append(server_loss_bursts)
             loss_timescales[server_e].append(server_loss_timescale)
-            print("...connection {} run {} done".format(conn_no, run_no))
+            print("...connection {} run {} done\n".format(conn_no, run_no))
         for endpoint in loss_hists:
             print("calculating average for {}...", endpoint)
             avg_loss_bursts = compute_average_hist(loss_hists[endpoint])

@@ -128,7 +128,10 @@ def analysis(args):
             print("...{} done".format(os.path.basename(file_name)))
 
     # run analysis on files
-    if args.bandwidth:
+    print("\n")
+    if args.processcsv:
+        sys.exit(0)
+    elif args.bandwidth:
         print("Analyzing bandwidth...")
         bw.getBandwidth(csv_data_for_files, graph_dir)
     elif args.loss:
@@ -152,6 +155,8 @@ required_args.add_argument("-l", "--location",
     help="location trace is taken in, used for file name\n")
 # required_args.add_argument("-I", "--ips",
 #     help="file containing list of server IPs, \n*** DON'T INCLUDE ENDPOINT OR TRIAL # ***\n")
+required_args.add_argument("-p", "--processcsv", 
+    help="only process csvs\n")
 required_args.add_argument("-P", "--path", 
     help="path to root directory of analysis results\n")
 required_args.add_argument("-T", "--testdir",
