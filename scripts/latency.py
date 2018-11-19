@@ -9,9 +9,9 @@ from helpers import group_files
 
 
 # Default values.
-bucketSize = 0.000005
+bucketSize = 0.00005
 minBucket = 0.0
-maxBucket = 0.0009
+maxBucket = 0.009
 
 # removes csv file after extracting csv data
 def parseCSV(file, save):
@@ -25,25 +25,42 @@ def parseCSV(file, save):
 
 
 # Plot possibly multiple files for latency.
-def plotLatency(buckets, results, files, graphDir):
-	xaxis = buckets
+# def plotLatency(buckets, results, files, graphDir):
+# 	xaxis = buckets
 
-	print("buckets", buckets)
+# 	print("results", results)
+
+# 	if len(results) == 0:
+# 		plt.plot(xaxis[:len(results[0])], results[0])
+# 		plt.title("Per Packet Latency for file %s" % files[0])
+# 	else:
+# 		for i in range(len(results)):
+# 			plt.plot(xaxis[:len(results[i])], results[i], label=files[i].split("/")[-1].split(".")[0])
+# 			plt.title("Per Packet Latency For One 100MB, One 1MB Downloads For Three Trials")
+# 	plt.xlabel("Latency(in buckets of %0.2f seconds)" % bucketSize)
+# 	plt.ylabel("Number of packets")
+# 	plt.legend()
+# 	plt.show()
+# 	graphfile = graphDir + "/" + filename_no_ext + ".png"
+# 	print("Saving figure to graph dir {} ...".format(graphDir))
+# 	plt.savefig(graphfile)
+
+
+# plot single line for average latency across trials.
+def plotLatency(buckets, results, endpoint_no, graphDir):
+
 	print("results", results)
 
-	if len(results) == 0:
-		plt.plot(xaxis[:len(results[0])], results[0])
-		plt.title("Per Packet Latency for file %s" % files[0])
-	else:
-		for i in range(len(results)):
-			plt.plot(xaxis[:len(results[i])], results[i], label=files[i].split("/")[-1].split(".")[0])
-			plt.title("Per Packet Latency For One 100MB, One 1MB Downloads For Three Trials")
+	plt.plot(buckets, results)
+
+	plt.title("Per Packet Latency for endpoint %s" % endpoint_no)
+
 	plt.xlabel("Latency(in buckets of %0.2f seconds)" % bucketSize)
 	plt.ylabel("Number of packets")
 	plt.legend()
-	plt.show()
-	graphfile = graphDir + "/" + filename_no_ext + ".png"
-	print("Saving figure to graph dir {} ...".format(graphDir))
+	#plt.show()
+	graphfile = graphDir + "/" + endpoint_no + ".png"
+	print("Saving figure {} to graph dir {} ...".format(graphfile, graphDir))
 	plt.savefig(graphfile)
 
 
@@ -65,27 +82,25 @@ def sortIntoBuckets(buckets, csvData):
 	return countsInBuckets
 
 # For each bucket, divide by the number of trials.
-def averageOverTrials(buckets, num_trials):
-	return [bucket/float(num_trials) for bucket in buckets]
-
+def averageOverTrials(results, num_trials):
+	agg_results = np.zeros(len(results[0]))
+	for trial in results:
+		for i in range(len(trial)):
+			agg_results[i] = agg_results[i] + trial[i]
+	return [result/float(num_trials) for result in agg_results]
 
 # Main.
 def getLatency(csvDataForFiles, graphDir):
 	print("Running latency script...")
 
-	print(csvDataForFiles)
-
 	# 2D array of results. Indexing into results gives the data for the y-axis.
 	results = []
-	files = []
 
 	numBuckets = int((maxBucket - minBucket) / float(bucketSize))
 	buckets = np.linspace(minBucket, maxBucket, num=numBuckets, endpoint=False)
 
 	# key is a run, each run's list should be averaged
 	runs = group_files(csvDataForFiles, False)
-
-	print(runs)
 
 	for endpoint_no in runs:
 
@@ -96,13 +111,7 @@ def getLatency(csvDataForFiles, graphDir):
 
 			csvData = trials[t]
 
-
-			#file = sys.argv[argNum]
-			#files.append(file)
 			print("Getting latency calculations for endpoint %s trial %d with bucket size %0.3f..." % (endpoint_no, t, bucketSize))
-
-			#csvData = parseCSV(file)
-			#print("Got CSV data, row 1 = ", csvData[1])
 
 			# Get the tail latency by keeping track of individual packets,
 			# find when they are received (or ACK'd), and note that latency.
@@ -115,16 +124,22 @@ def getLatency(csvDataForFiles, graphDir):
 
 			#print("Calculations for that trial complete." % file)
 
-		#print("All trials for endpoint %s gathered. Averaging over %d trials..." %(endpoint_no, num_trials))
-		#buckets = averageOverTrials(buckets, num_trials)
+		print("results before averaging", results)
+
+		print("All trials for endpoint %s gathered. Averaging over %d trials..." %(endpoint_no, num_trials))
+		results = averageOverTrials(results, num_trials)
 
 		print("Plotting endpoint %s..." % endpoint_no)
-		plotLatency(buckets, results, files, graphDir)
+		print("len bucks %d len res %d " % (len(buckets), len(results)))
+		plotLatency(buckets, results, endpoint_no, graphDir)
 
 	print("Plotting complete for all runs.")
 
 
-CSV_DATA = parseCSV("tmp.csv", False)
-CSV_DATA_FOR_FILES = {}
-CSV_DATA_FOR_FILES["tmp.csv"] = CSV_DATA
-getLatency(CSV_DATA_FOR_FILES, "tmp")
+# BELOW is for testing locally.
+# CSV_DATA = parseCSV("tmp.csv", False)
+# CSV_DATA_FOR_FILES = {}
+
+# #location_duration_endpoint_run
+# CSV_DATA_FOR_FILES["tmploc_120s_client1_1.pcap.zst"] = CSV_DATA
+# getLatency(CSV_DATA_FOR_FILES, "tmp")
