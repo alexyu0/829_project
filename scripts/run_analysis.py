@@ -5,7 +5,6 @@ import sys
 import argparse
 import subprocess
 import time
-import random
 import atexit
 import bandwidth as bw
 import csv
@@ -49,6 +48,7 @@ def analysis(args):
         print("Invalid analysis specified")
         sys.exit(1)
     print("analysis...")
+    
     # make file name
     duration = ""
     short_duration = ""
@@ -90,6 +90,7 @@ def analysis(args):
         test_dir = "{}/{}/{}".format(root_test_dir, "normal", file_name)
         graph_dir = "{}/{}/{}/{}".format(root_graph_dir, analysis_type, "normal", file_name)
         test_str = "normal"
+    l_info = file_name
 
     if not os.path.exists(test_dir):
         print("Test dir {} doesn't exist!".format(test_dir))
@@ -98,36 +99,43 @@ def analysis(args):
         os.makedirs(graph_dir)
     if not os.path.exists(analysis_dir):
         os.makedirs(analysis_dir)
-    if root_csv_dir != "" and not os.path.exists(root_csv_dir + "/rtt"):
-        os.makedirs(root_csv_dir + "/rtt")
-    if root_csv_dir != "" and not os.path.exists(root_csv_dir + "/info"):
-        os.makedirs(root_csv_dir + "/info")
     print("Analysis_dir {} set up to analyze test_dir {}.".format(analysis_dir, test_dir))
 
     # decompress files one at a time and extract information from them
     csv_data_for_files = {}
     for file_name in os.listdir(test_dir):
         if file_name.endswith(".zst"):
-            file_with_path = test_dir + "/" + file_name
-            # decompress one at a time size these files are big
-            print("Decompressing {}...".format(os.path.basename(file_name)))
-            pcapfile = decompress(file_with_path)
-            if not os.path.exists(pcapfile):
-                print("Failed to create pcap file for {}".format(file_name))
-                sys.exit(1)
-
-            # make different csv depending on the test, remove pcap too
-            print("Parsing {} to csv...".format(os.path.basename(file_name)))
-            csvfile = make_csv(pcapfile, analysis_type, args.savecsv, root_csv_dir)
+            # check if saved first
+            csvfile = os.path.abspath(file_name).split(".pcap.zst")[0] + ".csv"
+            if args.savecsv:
+                if analysis_type == "latency":
+                    csvfile = "{}/rtt/{}/{}/{}.csv".format(
+                        root_csv_dir, test_str, l_info, file_name.split(".pcap.zst")[0])
+                else:
+                    csvfile = "{}/info/{}/{}/{}.csv".format(
+                        root_csv_dir, test_str, l_info, file_name.split(".pcap.zst")[0])
+            
             if not os.path.exists(csvfile):
-                print("Failed to create csv file for {}".format(file_name))
-                sys.exit(1)
+                file_with_path = test_dir + "/" + file_name
+                # decompress one at a time size these files are big
+                print("Decompressing {}...".format(os.path.basename(file_name)))
+                pcapfile = decompress(file_with_path)
+                if not os.path.exists(pcapfile):
+                    print("Failed to create pcap file for {}".format(file_name))
+                    sys.exit(1)
+
+                # make different csv depending on the test, remove pcap too
+                print("Parsing {} to csv...".format(os.path.basename(file_name)))
+                new_csvfile = make_csv(pcapfile, csvfile, analysis_type)
+                if not os.path.exists(new_csvfile):
+                    print("Failed to create csv file for {}".format(file_name))
+                    sys.exit(1)
 
             # extract data for each file
             print("Extracting from {}...".format(os.path.basename(csvfile)))
             csv_data_for_files[file_name] = parseCSV(csvfile, args.savecsv) # removes csvfile
             print("...{} done".format(os.path.basename(file_name)))
-
+    
     # run analysis on files
     print("\n")
     if args.processcsv:
@@ -203,12 +211,8 @@ test_args.add_argument("-Y", "--latency",
     action="store_true",
     help="analyze per packet latency\n")
 
-test_args = parser.add_argument("-A", "--alldumps",
-    help="run specified analysis on all dumps in the specified root test dir")
-
 parser.set_defaults(func=analysis)
 
 if __name__ == '__main__':
-    random.seed()
     args = parser.parse_args()
     args.func(args)

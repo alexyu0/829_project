@@ -18,13 +18,13 @@ def get_lost_packets(client_data, server_data):
     """
     client_out_packets = defaultdict(list) # client -> server
     server_out_packets = defaultdict(list) # server -> client
-    client_port = str(constants.CLIENT_1_PORT)
+    client_ports = set([str(constants.CLIENT_1_PORT), str(constants.CLIENT_2_PORT)])
     server_port = str(constants.SERVER_PORT)
 
     # parse data to populate respective dicts
     client_in_data = [] # data to match against for server_out_packets
     for row in client_data:
-        if row[constants.SRC_PORT_COL] == client_port and row[constants.DST_PORT_COL] == server_port:
+        if row[constants.SRC_PORT_COL] in client_ports and row[constants.DST_PORT_COL] == server_port:
             payload_size = int(row[constants.DATA_LEN_COL])
             seq = int(row[constants.SEQ_NUM_COL])
             ack = int(row[constants.ACK_NUM_COL])
@@ -45,12 +45,12 @@ def get_lost_packets(client_data, server_data):
                         row[constants.REL_TIME_COL],
                         int(row[constants.IP_ID_COL], 16)
                     ])
-        elif row[constants.SRC_PORT_COL] == server_port and row[constants.DST_PORT_COL] == client_port:
+        elif row[constants.SRC_PORT_COL] == server_port and row[constants.DST_PORT_COL] in client_ports:
             client_in_data.append(row)
     
     server_in_data = [] # data to match against for client_out_packets
     for row in server_data:
-        if row[constants.SRC_PORT_COL] == server_port and row[constants.DST_PORT_COL] == client_port:
+        if row[constants.SRC_PORT_COL] == server_port and row[constants.DST_PORT_COL] in client_ports:
             payload_size = int(row[constants.DATA_LEN_COL])
             seq = int(row[constants.SEQ_NUM_COL])
             ack = int(row[constants.ACK_NUM_COL])
@@ -71,7 +71,7 @@ def get_lost_packets(client_data, server_data):
                         row[constants.REL_TIME_COL],
                         int(row[constants.IP_ID_COL], 16) + i
                     ])
-        elif row[constants.SRC_PORT_COL] == client_port and row[constants.DST_PORT_COL] == server_port:
+        elif row[constants.SRC_PORT_COL] in client_ports and row[constants.DST_PORT_COL] == server_port:
             server_in_data.append(row)
 
     # go through data of opposite direction to determine which packets were lost
@@ -105,7 +105,6 @@ def get_lost_packets(client_data, server_data):
         server.extend([(ts, lost) for (lost, ts, utc) in packets])
     server.sort()
 
-    print(len(server), len(client_in_data))
     return client, server
 
 def get_test_name(fname, endpoint):
@@ -169,7 +168,7 @@ def loss_timescale(data_lines, graph_individual=False):
 
         if lost:
             curr_data_bucket += 1
-    
+
     return (time_buckets, data_buckets)
 
 def compute_average_hist(loss_bursts):
@@ -178,22 +177,35 @@ def compute_average_hist(loss_bursts):
         for length in hist:
             average_loss_bursts[length] += hist[length]
     
+    to_del = []
     for length in average_loss_bursts:
         average_loss_bursts[length] = int(average_loss_bursts[length] / len(loss_bursts))
+        if (average_loss_bursts[length] == 0):
+            to_del.append(length)
+    for length in to_del:
+        average_loss_bursts.pop(length, None)
     
     return average_loss_bursts
 
 def compute_average_timescale(loss_timescales):
-    average_data_buckets = [0 for i in range(0, len(loss_timescales[0][1]))]
+    time_buckets = []
+    average_data_buckets = []
     for buckets in loss_timescales:
         for i in range(0, len(buckets[1])):
-            average_data_buckets[i] += buckets[1][i]
+            if i >= len(average_data_buckets):
+                # first one so can just append
+                average_data_buckets.append(buckets[1][i])
+            else:
+                average_data_buckets[i] += buckets[1][i]
+
+            if i >= len(time_buckets):
+                # first one so can just append
+                time_buckets.append(buckets[0][i])
     
     for i in range(0, len(average_data_buckets)):
         average_data_buckets[i] = int(average_data_buckets[i] / len(loss_timescales))
 
-    return average_data_buckets
-
+    return (time_buckets, average_data_buckets)
 # *********************************** END *********************************** #
 
 # ******************************** GRAPHING ********************************** #
@@ -213,7 +225,9 @@ def graph_hist(loss_bursts, endpoint, name_pre, graph_dir):
     plt.ylabel("Frequency")
     plt.title("Frequency of loss burst sizes for {} {}".format(name_pre, endpoint))
 
-    height_space = int(max(loss_bursts.values()) * 0.02)
+    height_space = 0
+    if len(loss_bursts.values()) != 0:
+        height_space = int(max(loss_bursts.values()) * 0.02)
     for i in range(0, len(g.patches)):
         rect = g.patches[i]
         ax.text(rect.get_x() + rect.get_width()/2,
@@ -245,15 +259,16 @@ def analyze_loss(file_to_csvrows, graph_dir, test_str):
     """
     Runs analysis on data for some files, assumed to be from the same test
     """
-    l, d, e, r = file_to_csvrows.keys()[0].split("_")
+    l, d, e, r = list(file_to_csvrows.keys())[0].split("_")
     name_pre = "{}_{}_{}_".format(test_str, l, d)
 
     # group by connection number and run number
     print("Analyzing loss...")
-    runs = helpers.group_files(file_to_csvrows, test_str, True)
+    runs = helpers.group_files(file_to_csvrows, True)
 
     # do the thing
     for conn_no in runs:
+        print("\n")
         print("analyzing connection {}...".format(conn_no))
         loss_hists = defaultdict(list)
         loss_timescales = defaultdict(list)
@@ -281,7 +296,9 @@ def analyze_loss(file_to_csvrows, graph_dir, test_str):
             loss_timescales[server_e].append(server_loss_timescale)
             print("...connection {} run {} done\n".format(conn_no, run_no))
         for endpoint in loss_hists:
-            print("calculating average for {}...", endpoint)
+            # SERVER means packets lost from server to client
+            # CLIENT means packets lost from client to server
+            print("calculating average for {}...".format(endpoint))
             avg_loss_bursts = compute_average_hist(loss_hists[endpoint])
             avg_loss_timescale = compute_average_timescale(loss_timescales[endpoint])
             graph_hist(avg_loss_bursts, endpoint, name_pre, graph_dir)

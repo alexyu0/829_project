@@ -39,7 +39,8 @@ def group_files(file_to_csvrows, pair):
                 runs[endpoint_no][r][endpoint] = file_to_csvrows[file_name]
             else:
                 runs[e].append(file_to_csvrows[file_name])
-    
+
+    # sys.exit(0)
     return runs
 
 def parseCSV(file):
@@ -81,37 +82,31 @@ def calculate_time_bucket_data(csvData, data_fn):
     return time_buckets, data_buckets
     
 # removes pcap file after creating csv file
-def make_csv(pcapfile, analysis_type, save, root_csv_dir):
-    csvfile = pcapfile.split(".")[0] + ".csv"
-    if save:
-        if analysis_type == "latency":
-            csvfile = "{}/rtt/{}".format(root_csv_dir, os.path.basename(csvfile))
-        else:
-            csvfile = "{}/info/{}".format(root_csv_dir, os.path.basename(csvfile))
+def make_csv(pcapfile, csvfile, analysis_type):
+    if not os.path.exists(os.path.dirname(csvfile)):
+        os.makedirs(os.path.dirname(csvfile))
 
     # checks if csv already exists first
     if analysis_type == "latency": # latency
-        if not os.path.exists(csvfile):
-            os.system("tshark -r {} \
-                -Y tcp.analysis.ack_rtt \
-                -e tcp.analysis.ack_rtt \
-                -T fields \
-                -E separator=, \
-                -E quote=d > {}".format(pcapfile, csvfile))
+        os.system("tshark -r {} \
+            -Y tcp.analysis.ack_rtt \
+            -e tcp.analysis.ack_rtt \
+            -T fields \
+            -E separator=, \
+            -E quote=d > {}".format(pcapfile, csvfile))
     else:
-        if not os.path.exists(csvfile):
-            os.system('tshark -r {} \
-                -Y "tcp" \
-                -e frame.time_relative \
-                -e ip.id \
-                -e tcp.srcport \
-                -e tcp.dstport \
-                -e tcp.seq \
-                -e tcp.ack \
-                -e tcp.len \
-                -T fields \
-                -E separator=, \
-                > {}'.format(pcapfile, csvfile))
+        os.system('tshark -r {} \
+            -Y "tcp" \
+            -e frame.time_relative \
+            -e ip.id \
+            -e tcp.srcport \
+            -e tcp.dstport \
+            -e tcp.seq \
+            -e tcp.ack \
+            -e tcp.len \
+            -T fields \
+            -E separator=, \
+            > {}'.format(pcapfile, csvfile))
 
     os.system("rm {}".format(pcapfile))
     return csvfile
