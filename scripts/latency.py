@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
+from collections import defaultdict
 from helpers import group_files
 
 
@@ -40,7 +41,7 @@ def plotLatency(buckets, results, files, graphDir):
 	plt.xlabel("Latency(in buckets of %0.2f seconds)" % bucketSize)
 	plt.ylabel("Number of packets")
 	plt.legend()
-	#plt.show()
+	plt.show()
 	graphfile = graphDir + "/" + filename_no_ext + ".png"
 	print("Saving figure to graph dir {} ...".format(graphDir))
 	plt.savefig(graphfile)
@@ -65,7 +66,7 @@ def sortIntoBuckets(buckets, csvData):
 
 # For each bucket, divide by the number of trials.
 def averageOverTrials(buckets, num_trials):
-	pass
+	return [bucket/float(num_trials) for bucket in buckets]
 
 
 # Main.
@@ -87,6 +88,7 @@ def getLatency(csvDataForFiles, graphDir):
 	print(runs)
 
 	for endpoint_no in runs:
+
 		trials = runs[endpoint_no]
 		num_trials = len(trials)
 
