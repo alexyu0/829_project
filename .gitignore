@@ -2,3 +2,5 @@
 *.pcap
 csvs
 
+vendor/*
+!vendor/vendor.json

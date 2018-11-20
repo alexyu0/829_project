@@ -1,0 +1,74 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"path": "bytes",
+			"revision": ""
+		},
+		{
+			"path": "errors",
+			"revision": ""
+		},
+		{
+			"path": "fmt",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "aSC5mDYHjXloBwfli73Dwmotqxg=",
+			"path": "github.com/Hermes/go-raptor",
+			"revision": "0c513caa6abda849143ed7c6fbccfd9b3d7e4e15",
+			"revisionTime": "2014-03-15T19:41:31Z"
+		},
+		{
+			"checksumSHA1": "wQgnLiIqxmkfXQj7nhGXj/1L+Eo=",
+			"path": "github.com/google/gofountain",
+			"revision": "4928733085e9593b7dcdb0fe268b20e1e1184b6d",
+			"revisionTime": "2016-08-20T05:48:03Z"
+		},
+		{
+			"checksumSHA1": "vGHBCcWkLCbAc3PJcRs7vFbvaYM=",
+			"path": "github.com/klauspost/cpuid",
+			"revision": "c640019ed4bda023bac884990967336803e39e3a",
+			"revisionTime": "2018-11-11T19:45:02Z"
+		},
+		{
+			"checksumSHA1": "05PdHbv6Z3PC+W3CUxnubeBvF28=",
+			"path": "github.com/klauspost/reedsolomon",
+			"revision": "278ba25f43b885a3fd8da55cff33fc8c6a957960",
+			"revisionTime": "2018-11-15T23:23:56Z"
+		},
+		{
+			"path": "io",
+			"revision": ""
+		},
+		{
+			"path": "math",
+			"revision": ""
+		},
+		{
+			"path": "math/rand",
+			"revision": ""
+		},
+		{
+			"path": "runtime",
+			"revision": ""
+		},
+		{
+			"path": "sort",
+			"revision": ""
+		},
+		{
+			"path": "strconv",
+			"revision": ""
+		},
+		{
+			"path": "strings",
+			"revision": ""
+		},
+		{
+			"path": "sync",
+			"revision": ""
+		}
+	]
+}
