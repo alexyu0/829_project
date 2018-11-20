@@ -4,7 +4,8 @@
 ## Go setup
 Make sure this repo is under `src/github.com/alexyu0/` in a directory that
 GOPATH points to
-If `govendor` not installed, run `go get -u github.com/kardianos/govendor`
+
+If `govendor` not installed, run `go get -u github.com/kardianos/govendor` \
 In root directory of repo, run `govendor sync` to install vendored dependencies
 as listed in `vendor/vendor.json`
 
