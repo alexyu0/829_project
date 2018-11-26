@@ -3,22 +3,22 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "wQgnLiIqxmkfXQj7nhGXj/1L+Eo=",
-			"path": "github.com/google/gofountain",
+			"checksumSHA1": "jdw8LRWjN7Ks997kBqSkGC45flA=",
+			"path": "github.com/alexyu0/gofountain",
 			"revision": "4928733085e9593b7dcdb0fe268b20e1e1184b6d",
 			"revisionTime": "2016-08-20T05:48:03Z"
+		},
+		{
+			"checksumSHA1": "FDCoIKD3bLCUSwIIFRN4snvIXBM=",
+			"path": "github.com/alexyu0/reedsolomon",
+			"revision": "278ba25f43b885a3fd8da55cff33fc8c6a957960",
+			"revisionTime": "2018-11-15T23:23:56Z"
 		},
 		{
 			"checksumSHA1": "vGHBCcWkLCbAc3PJcRs7vFbvaYM=",
 			"path": "github.com/klauspost/cpuid",
 			"revision": "c640019ed4bda023bac884990967336803e39e3a",
 			"revisionTime": "2018-11-11T19:45:02Z"
-		},
-		{
-			"checksumSHA1": "05PdHbv6Z3PC+W3CUxnubeBvF28=",
-			"path": "github.com/klauspost/reedsolomon",
-			"revision": "278ba25f43b885a3fd8da55cff33fc8c6a957960",
-			"revisionTime": "2018-11-15T23:23:56Z"
 		}
 	],
 	"rootPath": "github.com/alexyu0/829_project"
