@@ -1,6 +1,15 @@
 # 829_project
 15829 project
 
+## Server setup
+Copy `50-cloud-init.yaml` to `/etc/netplan/` and change to permission mode `644` \
+Check the gateway for each of the internal IPs using first 2 lines of output from `ip route`
+Run the following
+ - `sudo ip route add default via <ens3 gateway> dev ens3 tab 1`
+ - `sudo ip route add default via <ens4 gateway> dev ens4 tab 2`
+ - `sudo ip rule add from <ens3 IP> tab 1`
+ - `sudo ip rule add from <ens4 IP> tab 2`
+
 ## Go setup
 Make sure this repo is under `src/github.com/alexyu0/` in a directory that
 GOPATH points to
