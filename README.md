@@ -1,7 +1,7 @@
 # 829_project
 15829 project
 
-## Server setup
+## EC2 NICs setup
 Copy `50-cloud-init.yaml` to `/etc/netplan/` and change to permission mode `644` \
 Check the gateway for each of the internal IPs using first 2 lines of output from `ip route`
 Run the following
