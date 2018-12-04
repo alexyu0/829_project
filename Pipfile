@@ -9,6 +9,7 @@ numpy = "*"
 pprint = "*"
 argparse = "*"
 paramiko = "*"
+pylint = "*"
 
 [dev-packages]
 pylint = "*"

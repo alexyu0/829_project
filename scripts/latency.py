@@ -51,15 +51,15 @@ def parseCSV(file, save):
 def plotLatency(buckets, results, endpoint_no, graphDir):
     yMax = max(results)
     plt.ylim(top=(yMax + yMax/8.0))
-    if "server" not in endpoint_no:
-        for last_i in range(len(results) - 1, -1, -1):
-            if int(results[last_i]) > 0:
-                break
-        buckets = buckets[:last_i]
-        xMax = buckets[min(last_i + 1, len(buckets) - 1)]
-        print(xMax, (xMax + xMax/8.0), yMax, (yMax + yMax/8.0))
-        plt.xlim(left=(-xMax/8.0), right=(xMax + xMax/8.0))
-        results = results[:last_i]
+    # if "server" not in endpoint_no:
+    #     for last_i in range(len(results) - 1, -1, -1):
+    #         if int(results[last_i]) > 0:
+    #             break
+    #     buckets = buckets[:last_i]
+    #     xMax = buckets[min(last_i + 1, len(buckets) - 1)]
+    #     print(xMax, (xMax + xMax/8.0), yMax, (yMax + yMax/8.0))
+    #     plt.xlim(left=(-xMax/8.0), right=(xMax + xMax/8.0))
+    #     results = results[:last_i]
 
     plt.plot(buckets, results)
     plt.title("Per Packet Latency for endpoint %s" % endpoint_no)

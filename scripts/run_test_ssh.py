@@ -24,20 +24,21 @@ def ssh_client_connect(ip, keyfile):
     ch.set_combine_stderr(True)
     return (ssh_client, ch)
 
-def server_iperf(ips, test_dir, i, file_name, args):
+def server_iperf(ssh_ips, pmd_ips, test_dir, i, file_name, args):
     """
     starts iperf in server mode on each of the AWS instances defined by an
     entry in ips
     """
     ssh_info = []
     filenames = []
-    for j in range(0, len(ips)):
-        ssh_client, ch = ssh_client_connect(ips[j], args.keyfile)
+    for j in range(0, len(ssh_ips)):
+        ssh_client, ch = ssh_client_connect(ssh_ips[j], args.keyfile)
         filename = "STDOUTDUMP_{}_server{}_{}".format(file_name, j+1, i)
-        cmd = "iperf3 -s > {}_{}".format(
-            os.path.basename(test_dir), filename)
+        cmd = "iperf3 -s -B {} > {}_{}".format(
+            pmd_ips[0], os.path.basename(test_dir), filename)
+        print(cmd)
         ch.exec_command(cmd)
-        print("server iperf for {} started".format(ips[j]))
+        print("server iperf for {} started".format(ssh_ips[j]))
         filenames.append(filename)
         ssh_info.append((ssh_client, ch))
     return (ssh_info, filenames)
@@ -64,8 +65,7 @@ def server_tcpdump(ips, test_dir, i, file_name, file_name_short, args):
         time.sleep(1)
         ssh_client, ch = ssh_client_connect(ips[j], args.keyfile)
         fname = "{}_server{}_{}".format(file_name, j+1, i)
-        cmd = "sudo tcpdump tcp -n -B 4096 port 5201 -w {}_{}.pcap".format(
-            os.path.basename(test_dir), 
+        cmd = "sudo tcpdump tcp -n -i enp6s0f0 -B 4096 port 5201 -w {}.pcap".format(
             fname)
         ch.exec_command(cmd)
         filenames.append(fname)
@@ -79,18 +79,19 @@ def kill_server_tcpdump(ssh_info, filenames, test_dir):
         ch.close()
         ssh_client.exec_command("pgrep tcpdump | xargs sudo kill -SIGINT")
         stdin, stdout, stderr = ssh_client.exec_command(
-            "zstd --rm -19 -f {}_{}.pcap -o {}_{}.pcap.zst".format(
-                os.path.basename(test_dir), 
+            "zstd --rm -19 -f {}.pcap -o {}.pcap.zst".format(
                 filenames[j],
-                os.path.basename(test_dir), 
+                filenames[j]))
+        print("zstd --rm -19 -f {}.pcap -o {}.pcap.zst".format(
+                filenames[j],
                 filenames[j]))
         if stdout.channel.recv_exit_status() != 0:
             print(stderr)
-            print("hi")
+            print("hi server")
             sys.exit(1)
         ftp_client = ssh_client.open_sftp()
         ftp_client.get(
-            "{}_{}.pcap.zst".format(os.path.basename(test_dir), filenames[j]),
+            "{}.pcap.zst".format(filenames[j]),
             "{}/{}.pcap.zst".format(test_dir, filenames[j]))
         ssh_client.exec_command("rm {}_{}.pcap.zst".format(
             os.path.basename(test_dir), 
@@ -106,54 +107,47 @@ def client_tcpdump(ips, test_dir, i, file_name, file_name_short, args):
     ssh_info = []
     for j in range(0, len(ips)):
         time.sleep(1)
-
         ssh_client, ch = ssh_client_connect(ips[j], args.keyfile)
-
-        if args.longshort and j == 1:
-            fname = "{}/{}_client{}_{}.pcap".format(test_dir, file_name_short, j+1, i)
-        else:
-            fname = "{}/{}_client{}_{}.pcap".format(test_dir, file_name, j+1, i)
-        cmd = "sudo tcpdump tcp -n -i any -B 4096 port {} and host {} -w {}".format(
+        fname = "{}_client{}_{}".format(file_name, j+1, i)
+        cmd = "sudo tcpdump tcp -n -i enp6s0f0 -B 4096 port {} -w {}.pcap".format(
             PORT_START + j,
-            ips[j],
             fname)
-
         ch.exec_command(cmd)
         #client_tcpdump_procs.append(subprocess.Popen([cmd],
         #    shell=True))
         filenames.append(fname)
-
         ssh_info.append((ssh_client, ch))
-
-        if (j == 0):
-            time.sleep(10) # time to enter password
     return (ssh_info, filenames)
 
 def kill_client_tcpdump(ssh_info, filenames, test_dir):
-    (ssh_client, ch) = ssh_info[j]
-    ch.close()
-    ssh_client.exec_command("pgrep tcpdump | xargs sudo kill -SIGINT")
-    remaning_tcpdump_procs = ssh_client.exec_command("pgrep tcpdump",
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    if len(remaning_tcpdump_procs.stdout.decode("utf-8").strip()) != 0:
-        print("WARNING WARNING")
-    for j in range(0, len(client_tcpdump_procs)):
-        ssh_client.exec_command("zstd --rm -19 -f {} -o {}.zst".format(
-            filenames[j], filenames[j]),
-            shell=True,
-            check=True)
-        print("client {} compressed".format(j))
-    ssh_client.close()   
-    #for i in range(0, 2):
-        # spam for good measure
-        #os.system("pgrep tcpdump | xargs sudo kill -SIGINT")
+    for j in range(0, len(ssh_info)):
+        (ssh_client, ch) = ssh_info[j]
+        ch.close()
+        ssh_client.exec_command("pgrep tcpdump | xargs sudo kill -SIGINT")
+        stdin, stdout, stderr = ssh_client.exec_command(
+            "zstd --rm -19 -f {}.pcap -o {}.pcap.zst".format(
+                filenames[j],
+                filenames[j]))
+        print("zstd --rm -19 -f {}.pcap -o {}.pcap.zst".format(
+                filenames[j],
+                filenames[j]))
+        if stdout.channel.recv_exit_status() != 0:
+            print(stderr)
+            print("hi client")
+            sys.exit(1)
+        ftp_client = ssh_client.open_sftp()
+        ftp_client.get(
+            "{}.pcap.zst".format(filenames[j]),
+            "{}/{}.pcap.zst".format(test_dir, filenames[j]))
+        ssh_client.exec_command("rm {}_{}.pcap.zst".format(
+            os.path.basename(test_dir), 
+            filenames[j]))
+        ssh_client.close()
 
-def cleanup(ips, keyfile):
+def cleanup(ssh_ips, keyfile):
     os.system("pgrep iperf3 | xargs sudo kill -9")
     os.system("pgrep tcpdump | xargs sudo kill -9")
-    for ip in ips:
+    for ip in ssh_ips:
         ssh_client, ch = ssh_client_connect(ip, keyfile)
         ssh_client.exec_command("pgrep iperf3 | xargs sudo kill -9")
         ssh_client.exec_command("pgrep tcpdump | xargs sudo kill -9")
@@ -164,11 +158,19 @@ def test(args):
     main testing function
     """
     # set up hosts
-    ips = []
-    with open(args.ips) as f:
-        ips = f.read().strip().split("\n")
-        ips = [ip for ip in ips if len(ip) > 0]
-    print("...hosts set up")
+    # ips = []
+    # with open(args.ips) as f:
+    #     ips = f.read().strip().split("\n")
+    #     ips = [ip for ip in ips if len(ip) > 0]
+    # print("...hosts set up")
+    ssh_ips = [
+        "c220g2-011012.wisc.cloudlab.us", # server
+        "c220g2-011011.wisc.cloudlab.us" # client
+    ]
+    pmd_ips = [
+        "192.0.0.2", # server
+        "192.0.0.4" # client
+    ]
 
     # make file name
     duration = ""
@@ -193,36 +195,39 @@ def test(args):
     root_test_dir = os.path.abspath(args.path)
     if args.concurrentlong:
         test_dir = "{}/{}/{}".format(root_test_dir, "concurrent_long", file_name)
+        print("not supported right now")
+        sys.exit(1)
     elif args.longshort:
         test_dir = "{}/{}/{}".format(root_test_dir, "long_and_short", file_name)
+        print("not supported right now")
+        sys.exit(1)
     elif args.normal:
         test_dir = "{}/{}/{}".format(root_test_dir, "normal", file_name)
-        ips = [ips[0]] # only 1 server
     else:
         print("NO VALID TEST STYLE")
         sys.exit(1)
     if not os.path.exists(test_dir):
         os.makedirs(test_dir)
     print("...test_dir {} set up".format(test_dir))
-    atexit.register(cleanup, ips=ips, keyfile=args.keyfile)
+    atexit.register(cleanup, ssh_ips=ssh_ips, keyfile=args.keyfile)
     print("...cleanup registered")
     
     for i in range(1, int(args.numtests) + 1):
         print("\n\n STARTING TEST {}...".format(i))
         # local tcpdump 
         client_tcpdump_procs, c_t_filenames = client_tcpdump(
-            ips, test_dir, i, file_name, file_name_short, args)
-        print("...started local tcpdump")
+            [ssh_ips[1]], test_dir, i, file_name, file_name_short, args)
+        print("...started local tcpdump {}".format(ssh_ips[1]))
 
         # remote ssh start iperf server
         iperf_ssh_info, s_i_filenames = server_iperf(
-            ips, test_dir, i, file_name, args)
-        print("...started server iperf")
+            [ssh_ips[0]], pmd_ips, test_dir, i, file_name, args)
+        print("...started server iperf {}".format(ssh_ips[0]))
 
         # remote ssh tcpdump server side
         tcpdump_ssh_info, s_t_filenames = server_tcpdump(
-            ips, test_dir, i, file_name, file_name_short, args)
-        print("...started server tcpdump")
+            [ssh_ips[0]], test_dir, i, file_name, file_name_short, args)
+        print("...started server tcpdump {}".format(ssh_ips[0]))
 
         # local iperf client start
         time.sleep(5) # let server get ready
@@ -230,47 +235,47 @@ def test(args):
         writers = []
         client_iperf_procs = []
         ssh_info = []
-        for j in range(0, len(ips)):
-            ssh_client, ch = ssh_client_connect(ips[j], args.keyfile)
-            #w = io.open("{}/STDOUTDUMP_{}_client{}_{}".format(test_dir, file_name, j+1, i), "wb")
-            #writers.append(w)
-            if args.longshort and j == 1:
-                cmd = "iperf3 --reverse --cport {} {} -c {}".format(
-                    PORT_START + j, 
-                    short_duration,
-                    ips[j])
-            else:
-                cmd = "iperf3 --reverse --cport {} {} -c {}".format(
-                    PORT_START + j, 
-                    duration,
-                    ips[j])
-            ssh_client.exec_command(cmd)
+        ssh_client, ch = ssh_client_connect(ssh_ips[1], args.keyfile)
+        #w = io.open("{}/STDOUTDUMP_{}_client{}_{}".format(test_dir, file_name, j+1, i), "wb")
+        #writers.append(w)
+        # if args.longshort and j == 1:
+        #     cmd = "iperf3 --reverse --cport {} {} -c {}".format(
+        #         PORT_START + j, 
+        #         short_duration,
+        #         ips[1])
+        # else:
+        cmd = "iperf3 -c {} -B {} --reverse --cport {} {} ".format(
+            pmd_ips[0],
+            pmd_ips[1],
+            PORT_START, 
+            duration)
+        print(cmd)
+        ssh_client.exec_command(cmd)
 
-            #client_iperf_procs.append(subprocess.Popen(cmd,
-            #    shell=True))#,
-                #stdout=w))
+        #client_iperf_procs.append(subprocess.Popen(cmd,
+        #    shell=True))#,
+            #stdout=w))
         print("...started local iperfs")
 
         # wait to finish
-        if args.longshort:
-            proc = client_iperf_procs[0]
-            while proc.poll() is None:
-                client_iperf_procs[1].wait()
-                print("short client iperf done, going again")
-                time.sleep(random.randint(10, 15))
-                cmd = "iperf3 --reverse --cport {} {} -c {}".format(
-                    PORT_START + 1, 
-                    short_duration,
-                    ips[j])
-                client_iperf_procs[1] = subprocess.Popen(cmd,
-                    shell=True,
-                    stdout=w)
-        else:
-            for j in range(0, len(client_iperf_procs)):
-                proc = client_iperf_procs[j]
-                while proc.poll() is None:
-                    time.sleep(0.5)
-                writers[j].close()
+        # if args.longshort:
+        #     proc = client_iperf_procs[0]
+        #     while proc.poll() is None:
+        #         client_iperf_procs[1].wait()
+        #         print("short client iperf done, going again")
+        #         time.sleep(random.randint(10, 15))
+        #         cmd = "iperf3 --reverse --cport {} {} -c {}".format(
+        #             PORT_START + 1, 
+        #             short_duration,
+        #             ips[j])
+        #         client_iperf_procs[1] = subprocess.Popen(cmd,
+        #             shell=True,
+        #             stdout=w)
+        # else:
+        if args.time is None:
+            print("only use size")
+            sys.exit(1)
+        time.sleep((int(args.time) * 1.05))
             
         # kill all other stuff
         kill_client_tcpdump(client_tcpdump_procs, c_t_filenames, test_dir)
@@ -291,8 +296,8 @@ parser = argparse.ArgumentParser(prog="PROG",
 required_args = parser.add_argument_group("required")
 required_args.add_argument("-l", "--location",
     help="location trace is taken in, used for file name\n")
-required_args.add_argument("-I", "--ips",
-    help="file containing list of server IPs, \n*** DON'T INCLUDE ENDPOINT OR TRIAL # ***\n")
+# required_args.add_argument("-I", "--ips",
+#     help="file containing list of server IPs, \n*** DON'T INCLUDE ENDPOINT OR TRIAL # ***\n")
 required_args.add_argument("-P", "--path", 
     help="path to root directory of test results\n")
 required_args.add_argument("-n", "--numtests", 
