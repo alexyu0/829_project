@@ -22,30 +22,50 @@ class Packet:
         self.packet_size = self.header_size + self.payload_size
 
 class NetworkBox:
-    def __init__(self, recv_ge_model, send_ge_model, latency):
+    def __init__(self, recv_ge_model, latency, line_rate):
         """
         Params:
          - ge_model: instance of GE model to be used to simulate loss
          - latency: latency for packet to go from one endpoint to another, ms
+         - line_rate: line rate of network
         """
         self.recv_ge_model = recv_ge_model
-        self.send_ge_model = send_ge_model
         self.latency = latency
+        self.line_rate = float(line_rate)
 
-class GEModel:
-    def __init__(self, p, r, g_s, b_s):
+    def data_transfer_time(self, data_amt):
+        """
+        use ms
+        """
+        return data_amt/self.line_rate * 1000
+
+class GEArgs:
+    def __init__(self, p, r, g_s, b_s, name):
         """
         Params:
          - p: probability of state transition G -> B
          - r: probability of state transition B -> G
          - g_s: probability of packet not being dropped in G, or k
          - b_s: probability of packet not being dropped in B, or h
+         - name: name to use for identifying parameters used
         """
-        self.p = model_constants.p if p is None else p
-        self.r = model_constants.r if r is None else r
-        self.good_success = model_constants.GOOD_SUCCESS if g_s is None else g_s
+        self.p = p
+        self.r = r
+        self.g_s = g_s
+        self.b_s = b_s
+        self.args_name = name
+
+class GEModel:
+    def __init__(self, args):
+        """
+        Params:
+         - args: instance of GEArgs
+        """
+        self.p = args.p
+        self.r = args.r
+        self.good_success = args.g_s
         self.good_error = 1 - self.good_success # probability of packet being dropped in G
-        self.bad_success = model_constants.BAD_SUCCESS if b_s is None else b_s
+        self.bad_success = args.b_s
         self.bad_error = 1 - self.bad_success # probability of packet being dropped in B
 
         self.state = model_constants.GOOD_STATE # always start in good state

@@ -11,7 +11,7 @@ import csv
 from collections import defaultdict
 
 from constants import PORT_START
-from loss_stats import analyze_loss
+from loss_stats import analyze_loss, aggregate_loss
 from helpers import make_csv, decompress, compress
 from latency import getLatency
 
@@ -63,6 +63,8 @@ def analysis(args):
         short_duration = "--bytes {}".format(int(int(args.size) * 10000))
         name_short_duration = "{}MB".format(str(int(int(args.size) * 10000)))
     file_name = "{}_{}".format(args.location, name_duration)
+    if args.aggregate:
+        file_name = "aggregate"
 
     # set up directories
     args.path = args.path.rstrip("/")
@@ -92,49 +94,92 @@ def analysis(args):
         test_str = "normal"
     l_info = file_name
 
-    if not os.path.exists(test_dir):
+    if not os.path.exists(test_dir) and not args.aggregate:
         print("Test dir {} doesn't exist!".format(test_dir))
         sys.exit(1)
+    print(graph_dir)
     if not os.path.exists(graph_dir):
         os.makedirs(graph_dir)
+    print(analysis_dir)
     if not os.path.exists(analysis_dir):
         os.makedirs(analysis_dir)
     print("Analysis_dir {} set up to analyze test_dir {}.".format(analysis_dir, test_dir))
 
     # decompress files one at a time and extract information from them
     csv_data_for_files = {}
-    for file_name in os.listdir(test_dir):
-        if file_name.endswith(".zst"):
-            # check if saved first
-            csvfile = os.path.abspath(file_name).split(".pcap.zst")[0] + ".csv"
-            if args.savecsv:
-                if analysis_type == "latency":
-                    csvfile = "{}/rtt/{}/{}/{}.csv".format(
-                        root_csv_dir, test_str, l_info, file_name.split(".pcap.zst")[0])
-                else:
-                    csvfile = "{}/info/{}/{}/{}.csv".format(
-                        root_csv_dir, test_str, l_info, file_name.split(".pcap.zst")[0])
-            
-            if not os.path.exists(csvfile):
-                file_with_path = test_dir + "/" + file_name
-                # decompress one at a time size these files are big
-                print("Decompressing {}...".format(os.path.basename(file_name)))
-                pcapfile = decompress(file_with_path)
-                if not os.path.exists(pcapfile):
-                    print("Failed to create pcap file for {}".format(file_name))
-                    sys.exit(1)
+    if not args.aggregate:
+        for file_name in os.listdir(test_dir):
+            if file_name.endswith(".zst"):
+                # check if saved first
+                csvfile = os.path.abspath(file_name).split(".pcap.zst")[0] + ".csv"
+                if args.savecsv:
+                    if analysis_type == "latency":
+                        csvfile = "{}/rtt/{}/{}/{}.csv".format(
+                            root_csv_dir, test_str, l_info, file_name.split(".pcap.zst")[0])
+                    else:
+                        csvfile = "{}/info/{}/{}/{}.csv".format(
+                            root_csv_dir, test_str, l_info, file_name.split(".pcap.zst")[0])
+                
+                if not os.path.exists(csvfile):
+                    file_with_path = test_dir + "/" + file_name
+                    # decompress one at a time size these files are big
+                    print("Decompressing {}...".format(os.path.basename(file_name)))
+                    pcapfile = decompress(file_with_path)
+                    if not os.path.exists(pcapfile):
+                        print("Failed to create pcap file for {}".format(file_name))
+                        sys.exit(1)
 
-                # make different csv depending on the test, remove pcap too
-                print("Parsing {} to csv...".format(os.path.basename(file_name)))
-                new_csvfile = make_csv(pcapfile, csvfile, analysis_type)
-                if not os.path.exists(new_csvfile):
-                    print("Failed to create csv file for {}".format(file_name))
-                    sys.exit(1)
+                    # make different csv depending on the test, remove pcap too
+                    print("Parsing {} to csv...".format(os.path.basename(file_name)))
+                    new_csvfile = make_csv(pcapfile, csvfile, analysis_type)
+                    if not os.path.exists(new_csvfile):
+                        print("Failed to create csv file for {}".format(file_name))
+                        sys.exit(1)
 
-            # extract data for each file
-            print("Extracting from {}...".format(os.path.basename(csvfile)))
-            csv_data_for_files[file_name] = parseCSV(csvfile, args.savecsv) # removes csvfile
-            print("...{} done".format(os.path.basename(file_name)))
+                # extract data for each file
+                print("Extracting from {}...".format(os.path.basename(csvfile)))
+                csv_data_for_files[file_name] = parseCSV(csvfile, args.savecsv) # removes csvfile
+                print("...{} done".format(os.path.basename(file_name)))
+    else:
+        if args.concurrentlong:
+            test_dir = "{}/{}".format(root_test_dir, "concurrent_long")
+        elif args.longshort:
+            test_dir = "{}/{}".format(root_test_dir, "long_and_short")
+        elif args.normal:
+            test_dir = "{}/{}".format(root_test_dir, "normal")
+        for (curr_dir, dirs, files) in os.walk(test_dir):
+            for file_name in files:
+                if file_name.endswith(".zst"):
+                    # check if saved first
+                    csvfile = os.path.abspath(file_name).split(".pcap.zst")[0] + ".csv"
+                    if args.savecsv:
+                        if analysis_type == "latency":
+                            csvfile = "{}/rtt/{}/{}/{}.csv".format(
+                                root_csv_dir, test_str, os.path.basename(curr_dir), file_name.split(".pcap.zst")[0])
+                        else:
+                            csvfile = "{}/info/{}/{}/{}.csv".format(
+                                root_csv_dir, test_str, os.path.basename(curr_dir), file_name.split(".pcap.zst")[0])
+                    
+                    if not os.path.exists(csvfile):
+                        file_with_path = curr_dir + "/" + file_name
+                        # decompress one at a time size these files are big
+                        print("Decompressing {}...".format(os.path.basename(file_name)))
+                        pcapfile = decompress(file_with_path)
+                        if not os.path.exists(pcapfile):
+                            print("Failed to create pcap file for {}".format(file_name))
+                            sys.exit(1)
+
+                        # make different csv depending on the test, remove pcap too
+                        print("Parsing {} to csv...".format(os.path.basename(file_name)))
+                        new_csvfile = make_csv(pcapfile, csvfile, analysis_type)
+                        if not os.path.exists(new_csvfile):
+                            print("Failed to create csv file for {}".format(file_name))
+                            sys.exit(1)
+
+                    # extract data for each file
+                    print("Extracting from {}...".format(os.path.basename(csvfile)))
+                    csv_data_for_files[file_name] = parseCSV(csvfile, args.savecsv) # removes csvfile
+                    print("...{} done".format(os.path.basename(file_name)))
     
     # run analysis on files
     print("\n")
@@ -145,10 +190,16 @@ def analysis(args):
         bw.getBandwidth(csv_data_for_files, graph_dir)
     elif args.loss:
         print("Analyzing packet loss...")
-        analyze_loss(csv_data_for_files, graph_dir, test_str)
+        if args.aggregate:
+            aggregate_loss(csv_data_for_files, graph_dir, test_str)
+        else:
+            analyze_loss(csv_data_for_files, graph_dir, test_str)
     elif args.latency:
         print("Analyzing per packet latency...")
-        getLatency(csv_data_for_files, graph_dir)
+        if args.aggregate:
+            aggregate_latency(csv_data_for_files, graph_dir)
+        else:
+            getLatency(csv_data_for_files, graph_dir)
         
     print("Analysis complete.")
     return
@@ -160,8 +211,12 @@ parser = argparse.ArgumentParser(prog="PROG",
     formatter_class=formatter)
 
 required_args = parser.add_argument_group("required")
-required_args.add_argument("-l", "--location",
+location_args = required_args.add_mutually_exclusive_group(required=True)
+location_args.add_argument("-l", "--location",
     help="location trace is taken in, used for file name\n")
+location_args.add_argument("-A", "--aggregate",
+    action="store_true",
+    help="analyze aggregates\n")
 # required_args.add_argument("-I", "--ips",
 #     help="file containing list of server IPs, \n*** DON'T INCLUDE ENDPOINT OR TRIAL # ***\n")
 required_args.add_argument("-p", "--processcsv", 

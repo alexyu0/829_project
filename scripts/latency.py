@@ -140,7 +140,7 @@ def averageOverTrials(results, num_trials):
     return [result/float(num_trials) for result in agg_results]
 
 # Main.
-def getLatency(csvDataForFiles, graphDir):
+def getLatency(csvDataForFiles, graphDir, aggregate=False):
     print("Running latency script...")
 
     numBuckets = int((maxBucket - minBucket) / float(bucketSize))
@@ -185,6 +185,8 @@ def getLatency(csvDataForFiles, graphDir):
         plotCDF(cdf_results, endpoint_no, graphDir)
 
     print("Plotting complete for all runs.")
+
+    # do aggregate graphs
 
 
 # BELOW is for testing locally.

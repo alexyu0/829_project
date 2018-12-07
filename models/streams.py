@@ -9,7 +9,8 @@ class CompressionType(Enum):
     H_264 = 16800000
 
 class Frame:
-    def __init__(self, size):
+    def __init__(self, ts, size):
+        self.ts = ts
         self.size = size
 
 class FixedSizeStream:
@@ -32,4 +33,26 @@ class FixedSizeStream:
          - compression: which type of compression to be used
         """
         compressed_frame_size = (compression.value/self.fps) # compressed size per frame
-        return [Frame(compressed_frame_size) for i in range(0, self.fps * duration)]
+        curr_ts = 0.0
+        frames = []
+        for i in range(0, self.fps * duration):
+            frames.append(Frame(curr_ts, compressed_frame_size))
+            curr_ts += 1.0/self.fps
+
+        return frames
+
+    def from_trace(self, trace_path):
+        """
+        Generates stream of frames in this format from trace specified by 
+        trace_path
+        """
+        ts_col = 0
+        frames = []
+        with open(trace_path) as f:
+            for line in f.readlines():
+                line = line.split(" ")
+                frames.append(Frame(
+                    float((line[ts_col].split("="))[1]),
+                    model_constants.PACKET_PAYLOAD + model_constants.PACKET_HEADER))
+        
+        return frames

@@ -209,41 +209,44 @@ def compute_average_timescale(loss_timescales):
 # *********************************** END *********************************** #
 
 # ******************************** GRAPHING ********************************** #
-def graph_hist(loss_bursts, endpoint, name_pre, graph_dir):
+def graph_hist(loss_bursts_s, endpoint, name_pre, graph_dir):
     """
     Graphs the histogram generated from loss_length_hist
     """
-    keys = sorted([int(k) for k in loss_bursts.keys()])
-    g = plt.bar(range(0, len(keys)), [v for (k,v) in sorted(loss_bursts.items())], width=0.8)
-    ax = plt.gca()
-    plt.xticks(range(0, len(keys)))
-    if len(keys) > 20:
-        ax.set_xticklabels(keys, fontsize=7)
-    else:
-        ax.set_xticklabels(keys)
+    for loss_bursts in loss_bursts_s:
+        keys = sorted([int(k) for k in loss_bursts.keys()])
+        g = plt.bar(range(0, len(keys)), [v for (k,v) in sorted(loss_bursts.items())], width=0.8)
+        ax = plt.gca()
+        plt.xticks(range(0, len(keys)))
+        if len(keys) > 20:
+            ax.set_xticklabels(keys, fontsize=7)
+        else:
+            ax.set_xticklabels(keys)
+
+        height_space = 0
+        if len(loss_bursts.values()) != 0:
+            height_space = int(max(loss_bursts.values()) * 0.02)
+        for i in range(0, len(g.patches)):
+            rect = g.patches[i]
+            ax.text(rect.get_x() + rect.get_width()/2,
+                rect.get_height() + height_space,
+                loss_bursts[keys[i]],
+                ha="center",
+                va="bottom").set_fontsize(7)
+
     plt.xlabel("Burst size")
     plt.ylabel("Frequency")
     plt.title("Frequency of loss burst sizes for {} {}".format(name_pre, endpoint))
-
-    height_space = 0
-    if len(loss_bursts.values()) != 0:
-        height_space = int(max(loss_bursts.values()) * 0.02)
-    for i in range(0, len(g.patches)):
-        rect = g.patches[i]
-        ax.text(rect.get_x() + rect.get_width()/2,
-            rect.get_height() + height_space,
-            loss_bursts[keys[i]],
-            ha="center",
-            va="bottom").set_fontsize(7)
-
     plt.savefig("{}/LossBurstHist_{}_{}.png".format(
         graph_dir, name_pre, endpoint))
     plt.clf()
     plt.close()
 
-def graph_loss_timescale(timescale, endpoint, name_pre, graph_dir):
-    time_buckets, data_buckets = timescale
-    plt.plot(time_buckets, data_buckets)
+def graph_loss_timescale(timescales, endpoint, name_pre, graph_dir):
+    for timescale in timescales:
+        time_buckets, data_buckets = timescale
+        plt.plot(time_buckets, data_buckets)
+
     plt.xlabel("Time (in buckets of %0.2f seconds)" % constants.BUCKET_SIZE)
     plt.ylabel("Packets lost")
     plt.title("Packets lost over time for {} {}".format(name_pre, endpoint))
@@ -255,10 +258,11 @@ def graph_loss_timescale(timescale, endpoint, name_pre, graph_dir):
 # *********************************** END *********************************** #
 
 # ******************************** SCRIPTS ********************************** #
-def analyze_loss(file_to_csvrows, graph_dir, test_str):
+def analyze_loss(file_to_csvrows, graph_dir, test_str, aggregate=False):
     """
     Runs analysis on data for some files, assumed to be from the same test
     """
+    print(file_to_csvrows.keys())
     l, d, e, r = list(file_to_csvrows.keys())[0].split("_")
     name_pre = "{}_{}_{}_".format(test_str, l, d)
 
@@ -301,9 +305,44 @@ def analyze_loss(file_to_csvrows, graph_dir, test_str):
             print("calculating average for {}...".format(endpoint))
             avg_loss_bursts = compute_average_hist(loss_hists[endpoint])
             avg_loss_timescale = compute_average_timescale(loss_timescales[endpoint])
-            graph_hist(avg_loss_bursts, endpoint, name_pre, graph_dir)
-            graph_loss_timescale(avg_loss_timescale, endpoint, name_pre, graph_dir)
+            graph_hist([avg_loss_bursts], endpoint, name_pre, graph_dir)
+            graph_loss_timescale([avg_loss_timescale], endpoint, name_pre, graph_dir)
             print("...done")
+    
+    if aggregate:
+        return (loss_hists, loss_timescales)
+
+def aggregate_loss(file_to_csvrows, graph_dir, test_str):
+    # get aggregate data
+    campus = {}
+    home = {}
+    starbucks = {}
+    for (key, values) in file_to_csvrows.items():
+        print(key)
+        if "campus" in key:
+            campus[key] = values
+        elif "home" in key:
+            home[key] = values
+        elif "starbucks" in key:
+            starbucks[key] = values
+
+    campus_hist, campus_timescale = analyze_loss(campus, graph_dir, test_str, True)
+    home_hist, home_timescale = analyze_loss(home, graph_dir, test_str, True)
+    starbucks_hist, starbucks_timescale = analyze_loss(starbucks, graph_dir, test_str, True)
+
+    for endpoint in campus_hist:
+        c_avg_loss_bursts = compute_average_hist(campus_hist[endpoint])
+        h_avg_loss_bursts = compute_average_hist(home_hist[endpoint])
+        s_avg_loss_bursts = compute_average_hist(starbucks_hist[endpoint])
+
+        c_avg_loss_timescale = compute_average_timescale(campus_timescale[endpoint])
+        h_avg_loss_timescale = compute_average_timescale(home_timescale[endpoint])
+        s_avg_loss_timescale = compute_average_timescale(starbucks_timescale[endpoint])
+
+        graph_hist([c_avg_loss_bursts, h_avg_loss_bursts, s_avg_loss_bursts], 
+            endpoint, "asdfasdf", graph_dir)
+        graph_loss_timescale([c_avg_loss_timescale, h_avg_loss_timescale, s_avg_loss_timescale], 
+            endpoint, "adfasdf", graph_dir)
 
 # *********************************** END *********************************** #
 
