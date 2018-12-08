@@ -1,6 +1,7 @@
 .DS_Store
 *.pcap
 csvs
+bess_csvs
 
 vendor/*
 !vendor/vendor.json
