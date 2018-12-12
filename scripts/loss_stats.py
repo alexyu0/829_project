@@ -246,7 +246,7 @@ def graph_loss_timescale(timescales, endpoint, name_pre, graph_dir):
     for timescale in timescales:
         time_buckets, data_buckets = timescale
         plt.plot(time_buckets, data_buckets)
-
+    plt.ylim(top=50000)
     plt.xlabel("Time (in buckets of %0.2f seconds)" % constants.BUCKET_SIZE)
     plt.ylabel("Packets lost")
     plt.title("Packets lost over time for {} {}".format(name_pre, endpoint))

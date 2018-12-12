@@ -3,7 +3,7 @@ import random
 from enum import Enum
 
 class PacketType(Enum):
-    ENCODE = 1
+    SOURCE = 1
     REPAIR = 2
     REQUEST = 3
     SIGNAL = 4

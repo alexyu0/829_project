@@ -36,7 +36,7 @@ class MiDAS:
         self.delay = args.delay
         self.T = int(self.delay/box.data_transfer_time(
             model_constants.PACKET_HEADER + model_constants.PACKET_PAYLOAD))
-        self.T_eff = self.T - 1 # TODO fix this 
+        self.T_eff = self.T - 1 
         self.W = self.T
         self.k_u = (self.T_eff - self.N + 1) * self.B
         self.k_v = (self.T_eff - self.N + 1) * (self.T_eff - self.B)
@@ -52,7 +52,9 @@ class MiDAS:
         Checks if parameters of instance is a valid and possible construction
         """
         bound = (float(self.R)/(1 - self.R)) * self.B + self.N
-        if bound <= self.T and bound > self.T_eff and ((1500 * 8) % self.k) == 0:
+        bound_met = bound <= self.T_eff + 1 and bound > self.T_eff 
+        if bound_met and self.k < model_constants.PACKET_PAYLOAD and self.N <= self.B:
+        # if bound_met:
             return True
         else:
             return False
@@ -71,7 +73,7 @@ class MiDAS:
         symbols_per_packet = 0
         if self.packet_mode == model_constants.MTU_PACKETS:
             # use packet that fills MTU size
-            symbols_per_packet = ceil(1500/self.symbol_size)
+            symbols_per_packet = ceil(model_constants.PACKET_PAYLOAD/self.symbol_size)
         elif self.packet_mode == model_constants.SYMBOL_PACKETS:
             # each packet is just 1 symbol
             symbols_per_packet = 1
@@ -81,7 +83,6 @@ class MiDAS:
         
         received_packets = []
         all_metrics = []
-        print(len(blocks), self.n)
         for block in blocks:
             # transmit each of the n channel packets
             metrics = analysis.BlockMetrics()
@@ -99,8 +100,10 @@ class MiDAS:
                 received_packets.append(self.box.recv_ge_model.process_packet(packet))
                 metrics.bandwidth += packet.packet_size
                 metrics.latency += self.box.data_transfer_time(packet.packet_size)
+            metrics.latency += self.box.latency
+            block_k_size = self.k * self.symbol_size
+            metrics.bandwidth_overhead = float(metrics.bandwidth - block_k_size)/block_k_size * 100
             all_metrics.append(metrics)
-        # metrics.latency += self.box.latency
         
         # check if can be recovered from
         print("checking recovery")
@@ -109,51 +112,29 @@ class MiDAS:
         loss = 0
         while window_end < len(received_packets):
             bursts = []
-            isolated = 0
+            arbitrary = 0
             curr_burst = 0
             window = received_packets[window_start:window_end]
             i = 0
             pkt_size = 0
             while i < len(window):
                 if window[i] is None:
-                    if i == 0: 
-                        if window[i+1] is not None:
-                            isolated += 1
-                            i += 2
-                        elif window[i+1] is None:
-                            curr_burst = 2
-                            i += 2
-                    elif i == len(window) - 1:
-                        if window[i-1] is not None:
-                            isolated += 1
-                        i += 1
-                    elif window[i-1] is not None:
-                        if window[i+1] is not None:
-                            isolated += 1
-                            i += 2
-                        else:
-                            curr_burst += 2
-                            i += 2
-                    elif window[i+1] is None:
-                        curr_burst += 2
-                        i += 2
-                    else:
-                        curr_burst += 1
-                        i += 1
+                    arbitrary += 1
+                    curr_burst += 1
                 else:
-                    if curr_burst != 0:
+                    if curr_burst > 1:
                         bursts.append(curr_burst)
-                        curr_burst = 0
+                    curr_burst = 0
                     pkt_size = window[i].num_symbols
-                    i += 1
+                i += 1
                 # print(i, len(window))
 
-            # print(window, bursts, isolated)
-            burst_and_isolate = len(bursts) > 0 and isolated > 0
+            # print(window, bursts, arbitrary)
             burst_large = len(bursts) > 0 and max(bursts) > self.B 
-            isolate_large = isolated > self.N
-            if burst_and_isolate or burst_large or isolate_large:
-                # print(burst_and_isolate, burst_large, isolate_large)
+            burst_many = len(bursts) > 1
+            arbitrary_large = arbitrary > self.N
+            if burst_large or (burst_many and arbitrary_large) or arbitrary_large:
+                # print(burst_and_isolate, burst_large, arbitrary_large)
                 # print(window, self.N, self.B)
                 loss += pkt_size
 
