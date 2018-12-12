@@ -99,8 +99,8 @@ class MiDAS:
                         self.symbol_size)
                 received_packets.append(self.box.recv_ge_model.process_packet(packet))
                 metrics.bandwidth += packet.packet_size
-                metrics.latency += self.box.data_transfer_time(packet.packet_size)
             metrics.latency += self.box.latency
+            metrics.latency += self.delay
             block_k_size = self.k * self.symbol_size
             metrics.bandwidth_overhead = float(metrics.bandwidth - block_k_size)/block_k_size * 100
             all_metrics.append(metrics)

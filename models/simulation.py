@@ -184,7 +184,6 @@ def run_simulations(args):
     """
     ge_args = [
         network_model.GEArgs(0.01, 0.5, 1, 0, "Flach2013_params"),
-        network_model.GEArgs(0.0058, 0.3613, 0.9997, 0.4053, "Kumar2013_params_1"),
         network_model.GEArgs(0.018, 0.2401, 0.9994, 0.2946, "Kumar2013_params_5"),
         network_model.GEArgs(0.0279, 0.209, 0.9944, 0.177, "Kumar2013_params_10"), 
         network_model.GEArgs(0.0461, 0.168, 0.9884, 0.108, "Kumar2013_params_20")
@@ -208,8 +207,9 @@ def run_simulations(args):
             analysis.midas_argset_results("loss")
             analysis.midas_argset_results("bw")
         elif args.normalized:
-            analysis.normalized_results("RQ")
-            analysis.normalized_results("MiDAS")
+            # analysis.normalized_results("RQ")
+            # analysis.normalized_results("MiDAS")
+            analysis.normalized_results()
         elif args.graph:
             analysis.graph()
 
